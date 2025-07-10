@@ -2,10 +2,13 @@ package net.hollowcube.molang.eval;
 
 import net.hollowcube.molang.MolangExpr;
 import net.hollowcube.molang.runtime.ContentError;
+import net.hollowcube.molang.runtime.MolangMath;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public final class MolangEvaluator {
@@ -19,15 +22,31 @@ public final class MolangEvaluator {
     private boolean loopScope = false; // Whether we are currently in a looping scope (to catch break/continues)
     private int loopCounter = MAX_LOOP_COUNTER;
 
-    public MolangEvaluator() {
+    private final MutableHolderImpl variable = new MutableHolderImpl();
+    private final MutableHolderImpl temp = new MutableHolderImpl();
+    private final MolangValue.Holder root;
 
+    public MolangEvaluator(@NotNull Map<String, MolangValue> initial) {
+        var entries = new HashMap<>(initial);
+        entries.put("variable", variable);
+        entries.put("v", variable);
+        entries.put("temp", temp);
+        entries.put("t", temp);
+        entries.put("math", MolangMath.MODULE);
+        entries.put("m", MolangMath.MODULE);
+        this.root = new HolderImpl(Map.copyOf(entries));
     }
 
     public double eval(@NotNull MolangExpr expr) {
         loopCounter = MAX_LOOP_COUNTER;
         errors.clear();
+        temp.clear();
         final MolangValue value = Return.catching(() -> evalExpr(expr));
         return unwrapNumber(value, () -> "Expected number, got: " + value);
+    }
+
+    public @NotNull MolangValue getVariable(@NotNull String name) {
+        return variable.get(name);
     }
 
     private @NotNull MolangValue evalExpr(@NotNull MolangExpr expr) {
@@ -36,7 +55,7 @@ public final class MolangEvaluator {
                 case MolangExpr.Num num -> new MolangValue.Num(num.value());
                 case MolangExpr.Str str -> new MolangValue.Str(str.value());
                 case MolangExpr.Ident ident -> evalIdent(ident);
-                case MolangExpr.Access access -> null;
+                case MolangExpr.Access access -> evalAccess(access);
                 case MolangExpr.Unary unary -> evalUnary(unary);
                 case MolangExpr.Binary binary -> evalBinary(binary);
                 case MolangExpr.Ternary ternary -> evalTernary(ternary);
@@ -57,17 +76,33 @@ public final class MolangEvaluator {
         return switch (ident.value()) {
             case "continue" -> throw new Continue();
             case "break" -> throw new Break();
-            case "return" -> throw new Return(MolangValue.NIL); // TODO: return value? probably will end up as its own expr
+            // TODO: return value? probably will end up as its own expr
+            case "return" -> throw new Return(MolangValue.NIL);
             case "loop" -> LOOP_FUNC;
             case "for_each" -> {
                 this.errors.add(new ContentError("'for_each' expressions are not supported"));
                 yield MolangValue.NIL;
-            };
+            }
             case "this" -> {
                 this.errors.add(new ContentError("'this' expressions are not supported"));
                 yield MolangValue.NIL;
             }
+            default -> root.get(ident.value());
         };
+    }
+
+    private @NotNull MolangValue evalAccess(@NotNull MolangExpr.Access access) {
+        final MolangValue lhs = evalExpr(access.lhs());
+        if (!(lhs instanceof MolangValue.Holder holder)) {
+            errors.add(new ContentError("Cannot access field '" + access.field() + "' on: " + lhs));
+            return MolangValue.NIL;
+        }
+
+        final MolangValue value = holder.get(access.field());
+        // If the value is a function, we should call it with zero args.
+        if (value instanceof MolangValue.Function func)
+            return evalCallInternal(func, List.of());
+        return value;
     }
 
     private @NotNull MolangValue evalUnary(@NotNull MolangExpr.Unary unary) {
@@ -144,8 +179,26 @@ public final class MolangEvaluator {
     private @NotNull MolangValue evalCall(@NotNull MolangExpr.Call call) {
         final MolangValue lhs = evalExpr(call.lhs());
         if (lhs == LOOP_FUNC) return evalLoop(call.args());
+        if (!(lhs instanceof MolangValue.Function func)) {
+            errors.add(new ContentError("Cannot call non-function: " + lhs));
+            return MolangValue.NIL;
+        }
 
-        return MolangValue.NIL; // TODO: implement function calls
+        var args = new ArrayList<MolangValue>();
+        for (var arg : call.args()) {
+            var value = evalExpr(arg);
+            if (value instanceof MolangValue.Nil) {
+                errors.add(new ContentError("Cannot pass 'nil' as an argument to a function: " + call));
+                args.add(new MolangValue.Num(0.0)); // Replace nil with 0.0
+            }
+            args.add(value);
+        }
+
+        return evalCallInternal(func, args);
+    }
+
+    private @NotNull MolangValue evalCallInternal(@NotNull MolangValue.Function func, @NotNull List<MolangValue> args) {
+        return func.apply(args);
     }
 
     private @NotNull MolangValue evalLoop(@NotNull List<MolangExpr> args) {
@@ -216,6 +269,33 @@ public final class MolangEvaluator {
 
         public Return(@NotNull MolangValue value) {
             this.value = value;
+        }
+    }
+
+    // Other builtins
+
+    record HolderImpl(@NotNull Map<String, MolangValue> entries) implements MolangValue.Holder {
+        @Override
+        public @NotNull MolangValue get(@NotNull String field) {
+            return entries.getOrDefault(field, MolangValue.NIL);
+        }
+    }
+
+    static class MutableHolderImpl implements MolangValue.Holder.Mutable {
+        private final Map<String, MolangValue> state = new HashMap<>();
+
+        @Override
+        public void set(@NotNull String field, @NotNull MolangValue value) {
+            state.put(field, value);
+        }
+
+        @Override
+        public @NotNull MolangValue get(@NotNull String field) {
+            return state.getOrDefault(field, MolangValue.NIL);
+        }
+
+        public void clear() {
+            state.clear();
         }
     }
 }

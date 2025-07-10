@@ -6,6 +6,14 @@ import java.util.List;
 
 public sealed interface MolangExpr {
 
+    static @NotNull MolangExpr parseOrThrow(@NotNull String source) {
+        return parseOrThrow(source, false);
+    }
+
+    static @NotNull MolangExpr parseOrThrow(@NotNull String source, boolean multiline) {
+        return new MolangParser(source, multiline).parse();
+    }
+
     record Num(double value) implements MolangExpr {
     }
 

@@ -3,6 +3,7 @@ package net.hollowcube.molang.eval;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Map;
 
 public sealed interface MolangValue {
     @NotNull MolangValue NIL = new Nil();
@@ -37,6 +38,18 @@ public sealed interface MolangValue {
 
         @NotNull MolangValue apply(@NotNull List<MolangValue> args);
 
+    }
+
+    non-sealed interface Holder extends MolangValue {
+        static @NotNull Holder holder(@NotNull Map<String, MolangValue> map) {
+            return new MolangEvaluator.HolderImpl(Map.copyOf(map));
+        }
+
+        @NotNull MolangValue get(@NotNull String field);
+
+        interface Mutable extends Holder {
+            void set(@NotNull String field, @NotNull MolangValue value);
+        }
     }
 
 }

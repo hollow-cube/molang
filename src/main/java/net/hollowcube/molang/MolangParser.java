@@ -10,7 +10,12 @@ public final class MolangParser {
     private final MolangLexer lexer;
 
     public MolangParser(@NotNull String source) {
+        this(source, false);
+    }
+
+    public MolangParser(@NotNull String source, boolean multiline) {
         this.lexer = new MolangLexer(source);
+        //todo multiline support
     }
 
     public @NotNull MolangExpr parse() {
@@ -71,24 +76,6 @@ public final class MolangParser {
                         throw new IllegalStateException("rhs of member access must be an ident, was " + rhs);
                     yield new MolangExpr.Access(lhs, value);
                 }
-//                case LPAREN -> {
-//                    if (!(rhs instanceof MolangExpr.Ident))
-//                        throw new IllegalStateException("rhs of member access must be an ident, was " + rhs);
-//                    // Get argument list
-//                    List<MolangExpr> args = new ArrayList<>();
-//                    var next = lexer.peek();
-//
-//                    if (next != null && next != MolangLexer.Tok.RPAREN) {
-//                        do {
-//                            args.add(expr(0));
-//                            next = lexer.peek();
-//                        } while (next == MolangLexer.Tok.COMMA && lexer.next() != null);
-//
-//                        lexer.expect(MolangLexer.Tok.RPAREN);
-//                        yield new MolangExpr.Call(rhs, args);
-//                    }
-//                    yield lhs;
-//                }
                 default -> new MolangExpr.Binary(op.op, lhs, rhs);
             };
         }

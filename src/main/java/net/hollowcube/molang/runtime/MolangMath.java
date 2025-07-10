@@ -1,8 +1,13 @@
 package net.hollowcube.molang.runtime;
 
+import net.hollowcube.molang.eval.MolangValue;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class MolangMath {
+public final class MolangMath {
+    public static final MolangValue.Holder MODULE = new HolderImpl();
 
     /**
      * Absolute value of value
@@ -215,5 +220,168 @@ public class MolangMath {
      */
     public static double trunc(double value) {
         return value < 0 ? Math.ceil(value) : Math.floor(value);
+    }
+
+    // Gross glue below
+
+    private static final class HolderImpl implements MolangValue.Holder {
+        private static final MolangValue.Function ABS = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 1);
+            return new MolangValue.Num(abs(args[0]));
+        };
+        private static final MolangValue.Function ACOS = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 1);
+            return new MolangValue.Num(acos(args[0]));
+        };
+        private static final MolangValue.Function ASIN = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 1);
+            return new MolangValue.Num(asin(args[0]));
+        };
+        private static final MolangValue.Function ATAN = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 1);
+            return new MolangValue.Num(atan(args[0]));
+        };
+        private static final MolangValue.Function ATAN2 = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 2);
+            return new MolangValue.Num(atan2(args[0], args[1]));
+        };
+        private static final MolangValue.Function CEIL = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 1);
+            return new MolangValue.Num(ceil(args[0]));
+        };
+        private static final MolangValue.Function CLAMP = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 3);
+            return new MolangValue.Num(clamp(args[0], args[1], args[2]));
+        };
+        private static final MolangValue.Function COS = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 1);
+            return new MolangValue.Num(cos(args[0]));
+        };
+        private static final MolangValue.Function DIE_ROLL = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 3);
+            return new MolangValue.Num(dieRoll(args[0], args[1], args[2]));
+        };
+        private static final MolangValue.Function DIE_ROLL_INTEGER = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 3);
+            return new MolangValue.Num(dieRollInteger(args[0], args[1], args[2]));
+        };
+        private static final MolangValue.Function EXP = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 1);
+            return new MolangValue.Num(exp(args[0]));
+        };
+        private static final MolangValue.Function FLOOR = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 1);
+            return new MolangValue.Num(floor(args[0]));
+        };
+        private static final MolangValue.Function HERMITE_BLEND = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 1);
+            return new MolangValue.Num(hermiteBlend(args[0]));
+        };
+        private static final MolangValue.Function LERP = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 3);
+            return new MolangValue.Num(lerp(args[0], args[1], args[2]));
+        };
+        private static final MolangValue.Function LERP_ROTATE = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 3);
+            return new MolangValue.Num(lerprotate(args[0], args[1], args[2]));
+        };
+        private static final MolangValue.Function LN = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 1);
+            return new MolangValue.Num(ln(args[0]));
+        };
+        private static final MolangValue.Function MAX = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 2);
+            return new MolangValue.Num(max(args[0], args[1]));
+        };
+        private static final MolangValue.Function MIN = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 2);
+            return new MolangValue.Num(min(args[0], args[1]));
+        };
+        private static final MolangValue.Function MIN_ANGLE = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 1);
+            return new MolangValue.Num(minAngle(args[0]));
+        };
+        private static final MolangValue.Function MOD = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 2);
+            return new MolangValue.Num(mod(args[0], args[1]));
+        };
+        private static final MolangValue.Function PI = (rawArgs) -> {
+            checkArgs(rawArgs, 0);
+            return new MolangValue.Num(pi());
+        };
+        private static final MolangValue.Function POW = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 2);
+            return new MolangValue.Num(pow(args[0], args[1]));
+        };
+        private static final MolangValue.Function RANDOM = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 2);
+            return new MolangValue.Num(random(args[0], args[1]));
+        };
+        private static final MolangValue.Function RANDOM_INTEGER = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 2);
+            return new MolangValue.Num(randomInteger(args[0], args[1]));
+        };
+        private static final MolangValue.Function ROUND = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 1);
+            return new MolangValue.Num(round(args[0]));
+        };
+        private static final MolangValue.Function SIN = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 1);
+            return new MolangValue.Num(sin(args[0]));
+        };
+        private static final MolangValue.Function SQRT = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 1);
+            return new MolangValue.Num(sqrt(args[0]));
+        };
+        private static final MolangValue.Function TRUNC = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 1);
+            return new MolangValue.Num(trunc(args[0]));
+        };
+
+        @Override
+        public @NotNull MolangValue get(@NotNull String field) {
+            return switch (field) {
+                case "abs" -> ABS;
+                case "acos" -> ACOS;
+                case "asin" -> ASIN;
+                case "atan" -> ATAN;
+                case "atan2" -> ATAN2;
+                case "ceil" -> CEIL;
+                case "clamp" -> CLAMP;
+                case "cos" -> COS;
+                case "die_roll" -> DIE_ROLL;
+                case "die_roll_integer" -> DIE_ROLL_INTEGER;
+                case "exp" -> EXP;
+                case "floor" -> FLOOR;
+                case "hermite_blend" -> HERMITE_BLEND;
+                case "lerp" -> LERP;
+                case "lerprotate" -> LERP_ROTATE;
+                case "ln" -> LN;
+                case "max" -> MAX;
+                case "min" -> MIN;
+                case "min_angle" -> MIN_ANGLE;
+                case "mod" -> MOD;
+                case "pi" -> PI;
+                case "pow" -> POW;
+                case "random" -> RANDOM;
+                case "random_integer" -> RANDOM_INTEGER;
+                case "round" -> ROUND;
+                case "sin" -> SIN;
+                case "sqrt" -> SQRT;
+                case "trunc" -> TRUNC;
+                default -> NIL;
+            };
+        }
+
+        private static double[] checkArgs(@NotNull List<MolangValue> args, int expected) {
+            if (args.size() != expected)
+                throw new IllegalArgumentException("expected " + expected + " arguments, got: " + args.size());
+            double[] result = new double[expected];
+            for (int i = 0; i < expected; i++) {
+                // TODO: this needs to generate a content error...
+                result[i] = args.get(i) instanceof MolangValue.Num(double value) ? value : 0.0;
+            }
+            return result;
+        }
     }
 }
