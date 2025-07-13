@@ -5,7 +5,7 @@ plugins {
     signing
 }
 
-group = "net.hollowcube"
+group = "dev.hollowcube"
 version = "1.0-SNAPSHOT"
 
 repositories {
