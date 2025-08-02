@@ -2,6 +2,7 @@ package net.hollowcube.molang.eval;
 
 import net.hollowcube.molang.MolangExpr;
 import net.hollowcube.molang.runtime.ContentError;
+import net.hollowcube.molang.runtime.MolangContentException;
 import net.hollowcube.molang.runtime.MolangMath;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,6 +52,10 @@ public final class MolangEvaluator {
 
     public @NotNull MolangValue getVariable(@NotNull String name) {
         return variable.get(name);
+    }
+
+    public List<ContentError> getErrors() {
+        return errors;
     }
 
     private @NotNull MolangValue evalExpr(@NotNull MolangExpr expr) {
@@ -209,10 +214,12 @@ public final class MolangEvaluator {
     private @NotNull MolangValue evalCallInternal(@NotNull MolangValue.Function func, @NotNull List<MolangValue> args) {
         try {
             return func.apply(args);
+        } catch (MolangContentException e) {
+            errors.add(e.toContentError());
         } catch (Exception e) {
             errors.add(new ContentError("Error while calling function: " + func + ": " + e.getMessage()));
-            return MolangValue.NIL;
         }
+        return MolangValue.NIL;
     }
 
     private @NotNull MolangValue evalLoop(@NotNull List<MolangExpr> args) {

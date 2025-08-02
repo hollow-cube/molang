@@ -9,6 +9,12 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class MolangMath {
     public static final MolangValue.Holder MODULE = new HolderImpl();
 
+    private static void assertion(boolean condition, String message) {
+        if (!condition) {
+            throw new MolangContentException(message);
+        }
+    }
+
     /**
      * Absolute value of value
      */
@@ -20,6 +26,7 @@ public final class MolangMath {
      * arccos of value
      */
     public static double acos(double value) {
+        assertion(value >= -1 && value <= 1, "acos: value must be in the range [-1, 1]");
         return Math.toDegrees(Math.acos(value));
     }
 
@@ -27,6 +34,7 @@ public final class MolangMath {
      * arcsin of value
      */
     public static double asin(double value) {
+        assertion(value >= -1 && value <= 1, "asin: value must be in the range [-1, 1]");
         return Math.toDegrees(Math.asin(value));
     }
 
@@ -161,6 +169,7 @@ public final class MolangMath {
      * Return the remainder of value / denominator
      */
     public static double mod(double value, double denominator) {
+        assertion(denominator != 0, "mod: denominator cannot be zero");
         return value % denominator;
     }
 
