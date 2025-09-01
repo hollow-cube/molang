@@ -3,6 +3,7 @@ plugins {
 
     `maven-publish`
     signing
+    alias(libs.plugins.nmcp)
 }
 
 group = "dev.hollowcube"
@@ -29,6 +30,16 @@ java {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+nmcpAggregation {
+    centralPortal {
+        username = System.getenv("SONATYPE_USERNAME")
+        password = System.getenv("SONATYPE_PASSWORD")
+        publishingType = if ("dev" in project.version.toString()) "USER_MANAGED" else "AUTOMATIC"
+    }
+
+    publishAllProjectsProbablyBreakingProjectIsolation()
 }
 
 publishing.publications.create<MavenPublication>("maven") {
