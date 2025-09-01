@@ -96,6 +96,8 @@ public final class MolangOptimizer {
     }
 
     private static @Nullable MolangExpr optimizeMathCall(@NotNull String function, @NotNull List<MolangExpr> args) {
+        if (MolangMath.IMPURE_METHODS.contains(function)) return null;
+
         // All the args must be constant numbers, then we will just call the relevant math function.
         var argNumbers = new ArrayList<MolangValue>();
         for (MolangExpr arg : args) {

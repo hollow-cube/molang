@@ -4,10 +4,17 @@ import net.hollowcube.molang.eval.MolangValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class MolangMath {
+    private static final int DIE_ROLL_ITERATION_LIMIT = Integer.getInteger("molang.die-roll-iteration-limit", 100);
+
     public static final MolangValue.Holder MODULE = new HolderImpl();
+    public static final Set<String> IMPURE_METHODS = Set.of(
+            "die_roll", "die_roll_integer",
+            "random", "random_integer"
+    );
 
     private static void assertion(boolean condition, String message) {
         if (!condition) {
@@ -78,7 +85,7 @@ public final class MolangMath {
      */
     public static double dieRoll(double num, double low, double high) {
         double total = 0;
-        for (int i = 0; i < num; i++)
+        for (int i = 0; i < Math.clamp(num, 0, DIE_ROLL_ITERATION_LIMIT); i++)
             total += random(low, high);
         return total;
     }
@@ -88,7 +95,7 @@ public final class MolangMath {
      */
     public static double dieRollInteger(double num, double low, double high) {
         double total = 0;
-        for (int i = 0; i < num; i++)
+        for (int i = 0; i < Math.clamp(num, 0, DIE_ROLL_ITERATION_LIMIT); i++)
             total += randomInteger(low, high);
         return total;
     }
