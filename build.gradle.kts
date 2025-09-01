@@ -7,7 +7,8 @@ plugins {
 }
 
 group = "dev.hollowcube"
-version = "1.0-SNAPSHOT"
+version = System.getenv("TAG_VERSION") ?: "dev"
+description = "Molang parser and evaluator"
 
 repositories {
     mavenCentral()
