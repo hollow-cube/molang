@@ -242,115 +242,115 @@ public final class MolangMath {
 
     private static final class HolderImpl implements MolangValue.Holder {
         private static final MolangValue.Function ABS = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 1);
+            double[] args = checkArgs("abs", rawArgs, 1);
             return new MolangValue.Num(abs(args[0]));
         };
         private static final MolangValue.Function ACOS = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 1);
+            double[] args = checkArgs("acos", rawArgs, 1);
             return new MolangValue.Num(acos(args[0]));
         };
         private static final MolangValue.Function ASIN = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 1);
+            double[] args = checkArgs("asin", rawArgs, 1);
             return new MolangValue.Num(asin(args[0]));
         };
         private static final MolangValue.Function ATAN = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 1);
+            double[] args = checkArgs("atan", rawArgs, 1);
             return new MolangValue.Num(atan(args[0]));
         };
         private static final MolangValue.Function ATAN2 = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 2);
+            double[] args = checkArgs("atan2", rawArgs, 2);
             return new MolangValue.Num(atan2(args[0], args[1]));
         };
         private static final MolangValue.Function CEIL = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 1);
+            double[] args = checkArgs("ceil", rawArgs, 1);
             return new MolangValue.Num(ceil(args[0]));
         };
         private static final MolangValue.Function CLAMP = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 3);
+            double[] args = checkArgs("clamp", rawArgs, 3);
             return new MolangValue.Num(clamp(args[0], args[1], args[2]));
         };
         private static final MolangValue.Function COS = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 1);
+            double[] args = checkArgs("cos", rawArgs, 1);
             return new MolangValue.Num(cos(args[0]));
         };
         private static final MolangValue.Function DIE_ROLL = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 3);
+            double[] args = checkArgs("die_roll", rawArgs, 3);
             return new MolangValue.Num(dieRoll(args[0], args[1], args[2]));
         };
         private static final MolangValue.Function DIE_ROLL_INTEGER = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 3);
+            double[] args = checkArgs("die_roll_integer", rawArgs, 3);
             return new MolangValue.Num(dieRollInteger(args[0], args[1], args[2]));
         };
         private static final MolangValue.Function EXP = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 1);
+            double[] args = checkArgs("exp", rawArgs, 1);
             return new MolangValue.Num(exp(args[0]));
         };
         private static final MolangValue.Function FLOOR = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 1);
+            double[] args = checkArgs("floor", rawArgs, 1);
             return new MolangValue.Num(floor(args[0]));
         };
         private static final MolangValue.Function HERMITE_BLEND = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 1);
+            double[] args = checkArgs("hermite_blend", rawArgs, 1);
             return new MolangValue.Num(hermiteBlend(args[0]));
         };
         private static final MolangValue.Function LERP = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 3);
+            double[] args = checkArgs("lerp", rawArgs, 3);
             return new MolangValue.Num(lerp(args[0], args[1], args[2]));
         };
         private static final MolangValue.Function LERP_ROTATE = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 3);
+            double[] args = checkArgs("lerp_rotate", rawArgs, 3);
             return new MolangValue.Num(lerprotate(args[0], args[1], args[2]));
         };
         private static final MolangValue.Function LN = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 1);
+            double[] args = checkArgs("ln", rawArgs, 1);
             return new MolangValue.Num(ln(args[0]));
         };
         private static final MolangValue.Function MAX = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 2);
+            double[] args = checkArgs("max", rawArgs, 2);
             return new MolangValue.Num(max(args[0], args[1]));
         };
         private static final MolangValue.Function MIN = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 2);
+            double[] args = checkArgs("min", rawArgs, 2);
             return new MolangValue.Num(min(args[0], args[1]));
         };
         private static final MolangValue.Function MIN_ANGLE = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 1);
+            double[] args = checkArgs("min_angle", rawArgs, 1);
             return new MolangValue.Num(minAngle(args[0]));
         };
         private static final MolangValue.Function MOD = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 2);
+            double[] args = checkArgs("mod", rawArgs, 2);
             return new MolangValue.Num(mod(args[0], args[1]));
         };
         private static final MolangValue.Function PI = (rawArgs) -> {
-            checkArgs(rawArgs, 0);
+            checkArgs("pi", rawArgs, 0);
             return new MolangValue.Num(pi());
         };
         private static final MolangValue.Function POW = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 2);
+            double[] args = checkArgs("pow", rawArgs, 2);
             return new MolangValue.Num(pow(args[0], args[1]));
         };
         private static final MolangValue.Function RANDOM = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 2);
+            double[] args = checkArgs("random", rawArgs, 2);
             return new MolangValue.Num(random(args[0], args[1]));
         };
         private static final MolangValue.Function RANDOM_INTEGER = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 2);
+            double[] args = checkArgs("random_integer", rawArgs, 2);
             return new MolangValue.Num(randomInteger(args[0], args[1]));
         };
         private static final MolangValue.Function ROUND = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 1);
+            double[] args = checkArgs("round", rawArgs, 1);
             return new MolangValue.Num(round(args[0]));
         };
         private static final MolangValue.Function SIN = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 1);
+            double[] args = checkArgs("sin", rawArgs, 1);
             return new MolangValue.Num(sin(args[0]));
         };
         private static final MolangValue.Function SQRT = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 1);
+            double[] args = checkArgs("sqrt", rawArgs, 1);
             return new MolangValue.Num(sqrt(args[0]));
         };
         private static final MolangValue.Function TRUNC = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 1);
+            double[] args = checkArgs("trunc", rawArgs, 1);
             return new MolangValue.Num(trunc(args[0]));
         };
 
@@ -389,9 +389,9 @@ public final class MolangMath {
             };
         }
 
-        private static double[] checkArgs(@NotNull List<MolangValue> args, int expected) {
+        private static double[] checkArgs(@NotNull String name, @NotNull List<MolangValue> args, int expected) {
             if (args.size() != expected)
-                throw new IllegalArgumentException("expected " + expected + " arguments, got: " + args.size());
+                throw new MolangContentException("Expected %d arguments got %d for %s".formatted(expected, args.size(), name));
             double[] result = new double[expected];
             for (int i = 0; i < expected; i++) {
                 // TODO: this needs to generate a content error...

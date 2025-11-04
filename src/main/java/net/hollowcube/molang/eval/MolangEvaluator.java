@@ -43,7 +43,7 @@ public final class MolangEvaluator {
         errors.clear();
         temp.clear();
         final MolangValue value = Return.catching(() -> evalExpr(expr));
-        return unwrapNumber(value, () -> "Expected number, got: " + value);
+        return unwrapNumber(value, () -> "Expected number, got: " + value + ", check errors for details.");
     }
 
     public boolean evalBool(@NotNull MolangExpr expr) {
