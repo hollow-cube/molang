@@ -118,8 +118,7 @@ public final class MolangMath {
      * Useful for simple smooth curve interpolation using one of the Hermite Basis functions: 3t^2 - 2t^3. Note that while any valid float is a valid input, this function works best in the range [0,1].
      */
     public static double hermiteBlend(double value) {
-        //todo: implement me
-        throw new RuntimeException("hermite_blend not implemented");
+        return 3 * value * value - 2 * value * value * value;
     }
 
     /**
@@ -168,8 +167,14 @@ public final class MolangMath {
      * Minimize angle magnitude (in degrees) into the range [-180, 180)
      */
     public static double minAngle(double value) {
-        //todo: implement me
-        throw new RuntimeException("hermite_blend not implemented");
+        value = value % 360;
+        if (value >= 180) {
+            return value - 360;
+        } else if (value < -180) {
+            return value + 360;
+        } else {
+            return value;
+        }
     }
 
     /**
