@@ -46,7 +46,11 @@ public class TestMolangEvaluator {
                 Arguments.of("simple not 1",
                         "!1", "0.0"),
                 Arguments.of("simple not 2",
-                        "!0", "1.0")
+                        "!0", "1.0"),
+                Arguments.of("ease_in_out_cubic 1",
+                        "m.ease_in_out_cubic(0, 1, 0.5)", "0.5"),
+                Arguments.of("ease_in_out_cubic 2",
+                        "m.ease_in_out_cubic(0, 1, 0.75)", "0.9375")
         );
     }
 
