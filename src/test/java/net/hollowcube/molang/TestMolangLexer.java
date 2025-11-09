@@ -35,6 +35,13 @@ public class TestMolangLexer {
                 Arguments.of("??", MolangLexer.Tok.QUESTIONQUESTION),
                 Arguments.of("(", MolangLexer.Tok.LPAREN),
                 Arguments.of(")", MolangLexer.Tok.RPAREN),
+                Arguments.of("!", MolangLexer.Tok.BANG),
+                Arguments.of("!=", MolangLexer.Tok.BANGEQ),
+                Arguments.of("==", MolangLexer.Tok.EQEQ),
+                Arguments.of(">", MolangLexer.Tok.GT),
+                Arguments.of(">=", MolangLexer.Tok.GTEQ),
+                Arguments.of("<", MolangLexer.Tok.LT),
+                Arguments.of("<=", MolangLexer.Tok.LTEQ),
 
                 Arguments.of("123", MolangLexer.Tok.NUMBER),
                 Arguments.of("123.", MolangLexer.Tok.NUMBER),

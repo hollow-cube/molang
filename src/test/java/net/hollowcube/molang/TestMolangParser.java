@@ -54,7 +54,11 @@ public class TestMolangParser {
                 Arguments.of("ternary add precedence",
                         "1 ? 2 + 3 : 4", "(? 1.0 (+ 2.0 3.0) 4.0)"),
                 Arguments.of("loop call",
-                        "loop(10, {})", "(? loop 10.0 { })")
+                        "loop(10, {})", "(? loop 10.0 { })"),
+                Arguments.of("lt eq precedence 1",
+                        "1 < 2 == 3", "(== (< 1.0 2.0) 3.0)"),
+                Arguments.of("lt eq precedence 2",
+                        "1 == 2 < 3", "(== 1.0 (< 2.0 3.0))")
         );
     }
 }

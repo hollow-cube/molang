@@ -44,6 +44,8 @@ public final class MolangOptimizer {
                         case LT -> leftValue < rightValue ? 1.0 : 0.0;
                         case EQ -> leftValue == rightValue ? 1.0 : 0.0;
                         case NEQ -> leftValue != rightValue ? 1.0 : 0.0;
+                        case AND -> leftValue != 0 && rightValue != 0 ? 1.0 : 0.0;
+                        case OR -> leftValue != 0 || rightValue != 0 ? 1.0 : 0.0;
                     });
                 }
                 if (lhs instanceof MolangExpr.Str(String leftValue) && rhs instanceof MolangExpr.Str(

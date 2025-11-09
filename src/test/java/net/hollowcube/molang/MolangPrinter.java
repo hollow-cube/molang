@@ -32,18 +32,6 @@ final class MolangPrinter {
     }
 
     private static @NotNull String binaryOp(@NotNull MolangExpr.Binary.Op op) {
-        return switch (op) {
-            case PLUS -> "+";
-            case MINUS -> "-";
-            case DIV -> "/";
-            case MUL -> "*";
-            case NULL_COALESCE -> "??";
-            case GTE -> ">=";
-            case GT -> ">";
-            case LTE -> "<=";
-            case LT -> "<";
-            case EQ -> "==";
-            case NEQ -> "!=";
-        };
+        return op.symbol();
     }
 }

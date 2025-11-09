@@ -97,6 +97,10 @@ public final class MolangParser {
                 var rhs = expr(Operator.MINUS.prefixBindingPower());
                 yield new MolangExpr.Unary(MolangExpr.Unary.Op.NEGATE, rhs);
             }
+            case BANG -> {
+                var rhs = expr(Operator.NOT.prefixBindingPower());
+                yield new MolangExpr.Unary(MolangExpr.Unary.Op.NOT, rhs);
+            }
             case LPAREN -> {
                 var expr = expr(0);
                 lexer.expect(MolangLexer.Tok.RPAREN);
@@ -129,33 +133,45 @@ public final class MolangParser {
             case QUESTION -> Operator.TERNARY;
             case QUESTIONQUESTION -> Operator.NULL_COALESCE;
             case LPAREN -> Operator.LPAREN;
-            case GTE -> Operator.GTE;
-            case GE -> Operator.GE;
-            case LTE -> Operator.LTE;
-            case LE -> Operator.LE;
-            case EQ -> Operator.EQ;
-            case NEQ -> Operator.NEQ;
+            case GTEQ -> Operator.GTE;
+            case GT -> Operator.GE;
+            case LTEQ -> Operator.LTE;
+            case LT -> Operator.LE;
+            case EQEQ -> Operator.EQ;
+            case BANGEQ -> Operator.NEQ;
+            case AMPAMP -> Operator.AND;
+            case BARBAR -> Operator.OR;
             default -> null;
         };
     }
 
     private enum Operator {
-        NULL_COALESCE(5, 6, MolangExpr.Binary.Op.NULL_COALESCE),
+        MEMBER_ACCESS(35, 36, null), // TODO
+
+        NOT(28, 29, null), // Prefix only
+
+        MUL(27, 28, MolangExpr.Binary.Op.MUL),
+        DIV(27, 28, MolangExpr.Binary.Op.DIV),
+
         PLUS(25, 26, MolangExpr.Binary.Op.PLUS),
         MINUS(25, 26, MolangExpr.Binary.Op.MINUS),
-        DIV(27, 28, MolangExpr.Binary.Op.DIV),
-        MUL(27, 28, MolangExpr.Binary.Op.MUL),
-        LPAREN(30, 30, null),
 
-        GTE(30, 31, MolangExpr.Binary.Op.GTE),
-        GE(30, 31, MolangExpr.Binary.Op.GT),
-        LTE(30, 31, MolangExpr.Binary.Op.LTE),
-        LE(30, 31, MolangExpr.Binary.Op.LT),
-        EQ(30, 31, MolangExpr.Binary.Op.EQ),
-        NEQ(30, 31, MolangExpr.Binary.Op.NEQ),
+        GTE(24, 25, MolangExpr.Binary.Op.GTE),
+        GE(24, 25, MolangExpr.Binary.Op.GT),
+        LTE(24, 25, MolangExpr.Binary.Op.LTE),
+        LE(24, 25, MolangExpr.Binary.Op.LT),
 
-        MEMBER_ACCESS(35, 36, null),
-        TERNARY(0, 0, null); // Open of a ternary expression (?), only a postfix operator
+        EQ(23, 24, MolangExpr.Binary.Op.EQ),
+        NEQ(23, 24, MolangExpr.Binary.Op.NEQ),
+
+        AND(21, 22, MolangExpr.Binary.Op.AND),
+        OR(19, 20, MolangExpr.Binary.Op.OR),
+
+        TERNARY(0, 0, null), // Open of a ternary expression (?), only a postfix operator
+
+        NULL_COALESCE(5, 6, MolangExpr.Binary.Op.NULL_COALESCE),
+
+        LPAREN(30, 30, null);
 
         private final int lbp;
         private final int rbp;
@@ -170,6 +186,7 @@ public final class MolangParser {
         public int prefixBindingPower() {
             return switch (this) {
                 case MINUS -> 30;
+                case NOT -> 30;
                 default -> -1;
             };
         }

@@ -30,7 +30,23 @@ public class TestMolangEvaluator {
                 Arguments.of("basic arithmetic 2",
                         "(4+3)*2", "14.0"),
                 Arguments.of("basic math",
-                        "2*math.pi", "6.283185307179586")
+                        "2*math.pi", "6.283185307179586"),
+                Arguments.of("simple and 1",
+                        "1 && 0", "0.0"),
+                Arguments.of("simple and 2",
+                        "1 && 1", "1.0"),
+                Arguments.of("simple and 3",
+                        "1 && 1 && 1 && 1 && 0", "0.0"),
+                Arguments.of("simple or 1",
+                        "1 || 0", "1.0"),
+                Arguments.of("simple or 2",
+                        "0 || 0", "0.0"),
+                Arguments.of("simple or 3",
+                        "0 || 0 || 0 || 0 || 1", "1.0"),
+                Arguments.of("simple not 1",
+                        "!1", "0.0"),
+                Arguments.of("simple not 2",
+                        "!0", "1.0")
         );
     }
 

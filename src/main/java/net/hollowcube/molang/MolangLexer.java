@@ -8,7 +8,8 @@ public final class MolangLexer {
         PLUS, MINUS, STAR, SLASH,
         LPAREN, RPAREN, LBRACE, RBRACK,
         DOT, COMMA, COLON, QUESTION, QUESTIONQUESTION,
-        GTE, GE, LTE, LE, EQ, NEQ, SEMICOLON,
+        GTEQ, GT, LTEQ, LT, EQEQ, BANGEQ, SEMICOLON,
+        AMPAMP, BARBAR, BANG,
         NUMBER, IDENT;
     }
 
@@ -112,10 +113,12 @@ public final class MolangLexer {
             case '{' -> Tok.LBRACE;
             case '}' -> Tok.RBRACK;
             case ';' -> Tok.SEMICOLON;
-            case '>' -> match('=') ? Tok.GTE : Tok.GE;
-            case '<' -> match('=') ? Tok.LTE : Tok.LE;
-            case '=' -> match('=') ? Tok.EQ : unexpected(c);
-            case '!' -> match('=') ? Tok.NEQ : unexpected(c);
+            case '>' -> match('=') ? Tok.GTEQ : Tok.GT;
+            case '<' -> match('=') ? Tok.LTEQ : Tok.LT;
+            case '=' -> match('=') ? Tok.EQEQ : unexpected(c);
+            case '!' -> match('=') ? Tok.BANGEQ : Tok.BANG;
+            case '&' -> match('&') ? Tok.AMPAMP : unexpected(c);
+            case '|' -> match('|') ? Tok.BARBAR : unexpected(c);
             default -> unexpected(c);
         };
     }

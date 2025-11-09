@@ -58,12 +58,15 @@ public sealed interface MolangExpr {
             PLUS("+"), MINUS("-"), DIV("/"), MUL("*"),
             NULL_COALESCE("??"),
             GTE(">="), GT(">"), LTE(">="), LT("<"),
-            EQ("=="), NEQ("!=");
+            EQ("=="), NEQ("!="),
+            AND("&&"), OR("||");
 
             private final String symbol;
+
             Op(@NotNull String symbol) {
                 this.symbol = symbol;
             }
+
             @NotNull
             public String symbol() {
                 return symbol;
@@ -76,7 +79,8 @@ public sealed interface MolangExpr {
         }
     }
 
-    record Ternary(@NotNull MolangExpr cond, @NotNull MolangExpr thenExpr, @NotNull MolangExpr elseExpr) implements MolangExpr {
+    record Ternary(@NotNull MolangExpr cond, @NotNull MolangExpr thenExpr,
+                   @NotNull MolangExpr elseExpr) implements MolangExpr {
 
         @Override
         public String toString() {
