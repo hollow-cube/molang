@@ -1,9 +1,8 @@
 package net.hollowcube.molang;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class MolangLexer {
+final class MolangLexer {
     public enum Tok {
         PLUS, MINUS, STAR, SLASH,
         LPAREN, RPAREN, LBRACE, RBRACK,
@@ -18,7 +17,7 @@ public final class MolangLexer {
     private int start = 0;
     private int cursor = 0;
 
-    public MolangLexer(@NotNull String source) {
+    public MolangLexer(String source) {
         this.source = source;
     }
 
@@ -55,13 +54,13 @@ public final class MolangLexer {
         return result;
     }
 
-    public void expect(@NotNull Tok type) {
+    public void expect(Tok type) {
         var next = next();
         if (next != type)
             throw new IllegalStateException("Expected " + type + " but got " + next);
     }
 
-    public @NotNull String span() {
+    public String span() {
         return source.substring(start, cursor).strip();
     }
 

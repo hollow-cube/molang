@@ -2,7 +2,6 @@ package net.hollowcube.molang;
 
 import net.hollowcube.molang.eval.MolangValue;
 import net.hollowcube.molang.runtime.MolangMath;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -11,7 +10,7 @@ import java.util.List;
 // Implements some (very basic) optimizations for a Molang AST.
 public final class MolangOptimizer {
 
-    public static @NotNull MolangExpr optimizeAst(@NotNull MolangExpr expr) {
+    public static MolangExpr optimizeAst(MolangExpr expr) {
         return switch (expr) {
             case MolangExpr.Num num -> num;
             case MolangExpr.Str str -> str;
@@ -97,7 +96,7 @@ public final class MolangOptimizer {
         };
     }
 
-    private static @Nullable MolangExpr optimizeMathCall(@NotNull String function, @NotNull List<MolangExpr> args) {
+    private static @Nullable MolangExpr optimizeMathCall(String function, List<MolangExpr> args) {
         if (MolangMath.IMPURE_METHODS.contains(function)) return null;
 
         // All the args must be constant numbers, then we will just call the relevant math function.

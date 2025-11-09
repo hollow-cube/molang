@@ -4,7 +4,6 @@ import net.hollowcube.molang.MolangExpr;
 import net.hollowcube.molang.runtime.ContentError;
 import net.hollowcube.molang.runtime.MolangContentException;
 import net.hollowcube.molang.runtime.MolangMath;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +26,7 @@ public final class MolangEvaluator {
     private final MutableHolderImpl temp = new MutableHolderImpl();
     private final MolangValue.Holder root;
 
-    public MolangEvaluator(@NotNull Map<String, MolangValue> initial) {
+    public MolangEvaluator(Map<String, MolangValue> initial) {
         var entries = new HashMap<>(initial);
         entries.putIfAbsent("variable", variable);
         entries.putIfAbsent("v", variable);
@@ -38,7 +37,7 @@ public final class MolangEvaluator {
         this.root = new HolderImpl(Map.copyOf(entries));
     }
 
-    public double eval(@NotNull MolangExpr expr) {
+    public double eval(MolangExpr expr) {
         loopCounter = MAX_LOOP_COUNTER;
         errors.clear();
         temp.clear();
@@ -46,11 +45,11 @@ public final class MolangEvaluator {
         return unwrapNumber(value, () -> "Expected number, got: " + value + ", check errors for details.");
     }
 
-    public boolean evalBool(@NotNull MolangExpr expr) {
+    public boolean evalBool(MolangExpr expr) {
         return eval(expr) != 0.0;
     }
 
-    public @NotNull MolangValue getVariable(@NotNull String name) {
+    public MolangValue getVariable(String name) {
         return variable.get(name);
     }
 
@@ -58,7 +57,7 @@ public final class MolangEvaluator {
         return errors;
     }
 
-    private @NotNull MolangValue evalExpr(@NotNull MolangExpr expr) {
+    private MolangValue evalExpr(MolangExpr expr) {
         try {
             return switch (expr) {
                 case MolangExpr.Num num -> new MolangValue.Num(num.value());
@@ -82,7 +81,7 @@ public final class MolangEvaluator {
         }
     }
 
-    private @NotNull MolangValue evalIdent(@NotNull MolangExpr.Ident ident) {
+    private MolangValue evalIdent(MolangExpr.Ident ident) {
         return switch (ident.value()) {
             case "continue" -> throw new Continue();
             case "break" -> throw new Break();
@@ -101,7 +100,7 @@ public final class MolangEvaluator {
         };
     }
 
-    private @NotNull MolangValue evalAccess(@NotNull MolangExpr.Access access) {
+    private MolangValue evalAccess(MolangExpr.Access access) {
         final MolangValue lhs = evalExpr(access.lhs());
         if (!(lhs instanceof MolangValue.Holder holder)) {
             errors.add(new ContentError("Cannot access field '" + access.field() + "' on: " + lhs));
@@ -115,7 +114,7 @@ public final class MolangEvaluator {
         return value;
     }
 
-    private @NotNull MolangValue evalUnary(@NotNull MolangExpr.Unary unary) {
+    private MolangValue evalUnary(MolangExpr.Unary unary) {
         var rhs = evalExpr(unary.rhs());
         return switch (unary.op()) {
             case NEGATE -> new MolangValue.Num(-unwrapNumber(rhs,
@@ -125,7 +124,7 @@ public final class MolangEvaluator {
         };
     }
 
-    private @NotNull MolangValue evalBinary(@NotNull MolangExpr.Binary binary) {
+    private MolangValue evalBinary(MolangExpr.Binary binary) {
         final MolangValue lhs = evalExpr(binary.lhs());
         if (binary.op() == MolangExpr.Binary.Op.NULL_COALESCE) {
             if (lhs instanceof MolangValue.Nil)
@@ -139,7 +138,6 @@ public final class MolangEvaluator {
             case PLUS -> new MolangValue.Num(unwrapNumber(lhs, error) + unwrapNumber(rhs, error));
             case MINUS -> new MolangValue.Num(unwrapNumber(lhs, error) - unwrapNumber(rhs, error));
             case DIV -> {
-                ;
                 double rhsValue = unwrapNumber(rhs, error);
                 if (rhsValue == 0.0) {
                     errors.add(new ContentError("Division by zero: " + lhs + " / " + rhs));
@@ -175,26 +173,29 @@ public final class MolangEvaluator {
         };
     }
 
-    private @NotNull MolangValue evalTernary(@NotNull MolangExpr.Ternary ternary) {
+    private MolangValue evalTernary(MolangExpr.Ternary ternary) {
         final MolangValue conditionValue = evalExpr(ternary.cond());
         final boolean condition = unwrapBoolean(conditionValue,
                 () -> "Condition must be a number, not: " + ternary);
         return condition ? evalExpr(ternary.thenExpr()) : evalExpr(ternary.elseExpr());
     }
 
-    private @NotNull MolangValue evalBlock(@NotNull MolangExpr.Block block) {
+    private MolangValue evalBlock(MolangExpr.Block block) {
         for (var expr : block.exprs())
             evalExpr(expr); // Eval and ignore the results
         return MolangValue.NIL;
     }
 
-    private @NotNull MolangValue evalCall(@NotNull MolangExpr.Call call) {
+    private MolangValue evalCall(MolangExpr.Call call) {
         final MolangValue lhs = switch (call.lhs()) {
             case MolangExpr.Access access -> evalExpr(access.lhs()) instanceof MolangValue.Holder holder
                     ? holder.get(access.field()) : MolangValue.NIL;
             default -> evalExpr(call.lhs());
         };
-        if (lhs == LOOP_FUNC) return evalLoop(call.args());
+        if (lhs == LOOP_FUNC) {
+            evalLoop(call.args());
+            return MolangValue.NIL;
+        }
         if (!(lhs instanceof MolangValue.Function func)) {
             errors.add(new ContentError("Cannot call non-function: " + lhs));
             return MolangValue.NIL;
@@ -213,7 +214,7 @@ public final class MolangEvaluator {
         return evalCallInternal(func, args);
     }
 
-    private @NotNull MolangValue evalCallInternal(@NotNull MolangValue.Function func, @NotNull List<MolangValue> args) {
+    private MolangValue evalCallInternal(MolangValue.Function func, List<MolangValue> args) {
         try {
             return func.apply(args);
         } catch (MolangContentException e) {
@@ -224,17 +225,17 @@ public final class MolangEvaluator {
         return MolangValue.NIL;
     }
 
-    private @NotNull MolangValue evalLoop(@NotNull List<MolangExpr> args) {
+    private void evalLoop(List<MolangExpr> args) {
         if (args.size() != 2) {
             errors.add(new ContentError("loop requires exactly 2 arguments, got: " + args.size()));
-            return MolangValue.NIL;
+            return;
         }
         final MolangValue iterCountValue = evalExpr(args.getFirst());
         final int iterCount = (int) unwrapNumber(iterCountValue,
                 () -> "loop requires a number as the first argument, got: " + iterCountValue);
         if (!(args.getLast() instanceof MolangExpr.Block)) {
             errors.add(new ContentError("loop requires a block as the second argument, got: " + args.getLast()));
-            return MolangValue.NIL;
+            return;
         }
 
         var lastLoopScope = loopScope;
@@ -243,7 +244,7 @@ public final class MolangEvaluator {
             for (int i = 0; i < iterCount; i++) {
                 if (loopCounter-- <= 0) {
                     errors.add(new ContentError("Loop counter exceeded maximum limit of " + MAX_LOOP_COUNTER));
-                    return MolangValue.NIL;
+                    return;
                 }
 
                 try {
@@ -257,14 +258,13 @@ public final class MolangEvaluator {
         } finally {
             loopScope = lastLoopScope; // Exit loop
         }
-        return MolangValue.NIL;
     }
 
-    private boolean unwrapBoolean(@NotNull MolangValue value, @NotNull Supplier<String> errorSupplier) {
+    private boolean unwrapBoolean(MolangValue value, Supplier<String> errorSupplier) {
         return unwrapNumber(value, errorSupplier) != 0.0;
     }
 
-    private double unwrapNumber(@NotNull MolangValue value, @NotNull Supplier<String> errorSupplier) {
+    private double unwrapNumber(MolangValue value, Supplier<String> errorSupplier) {
         if (value instanceof MolangValue.Num(double val))
             return val;
         errors.add(new ContentError(errorSupplier.get()));
@@ -280,7 +280,7 @@ public final class MolangEvaluator {
     }
 
     private static class Return extends RuntimeException {
-        public static @NotNull MolangValue catching(@NotNull Supplier<MolangValue> supplier) {
+        public static MolangValue catching(Supplier<MolangValue> supplier) {
             try {
                 return supplier.get();
             } catch (Return ret) {
@@ -290,16 +290,16 @@ public final class MolangEvaluator {
 
         private final MolangValue value;
 
-        public Return(@NotNull MolangValue value) {
+        public Return(MolangValue value) {
             this.value = value;
         }
     }
 
     // Other builtins
 
-    record HolderImpl(@NotNull Map<String, MolangValue> entries) implements MolangValue.Holder {
+    record HolderImpl(Map<String, MolangValue> entries) implements MolangValue.Holder {
         @Override
-        public @NotNull MolangValue get(@NotNull String field) {
+        public MolangValue get(String field) {
             return entries.getOrDefault(field, MolangValue.NIL);
         }
     }
@@ -308,12 +308,12 @@ public final class MolangEvaluator {
         private final Map<String, MolangValue> state = new HashMap<>();
 
         @Override
-        public void set(@NotNull String field, @NotNull MolangValue value) {
+        public void set(String field, MolangValue value) {
             state.put(field, value);
         }
 
         @Override
-        public @NotNull MolangValue get(@NotNull String field) {
+        public MolangValue get(String field) {
             return state.getOrDefault(field, MolangValue.NIL);
         }
 

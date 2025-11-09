@@ -1,28 +1,28 @@
 package net.hollowcube.molang;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public final class MolangParser {
     private final MolangLexer lexer;
 
-    public MolangParser(@NotNull String source) {
+    public MolangParser(String source) {
         this(source, false);
     }
 
-    public MolangParser(@NotNull String source, boolean multiline) {
+    public MolangParser(String source, boolean multiline) {
         this.lexer = new MolangLexer(source);
         //todo multiline support
     }
 
-    public @NotNull MolangExpr parse() {
+    public MolangExpr parse() {
         return expr(0);
     }
 
-    private @NotNull MolangExpr expr(int minBindingPower) {
+    private MolangExpr expr(int minBindingPower) {
         MolangExpr lhs = lhs();
 
         while (true) {
@@ -76,7 +76,7 @@ public final class MolangParser {
                         throw new IllegalStateException("rhs of member access must be an ident, was " + rhs);
                     yield new MolangExpr.Access(lhs, value);
                 }
-                default -> new MolangExpr.Binary(op.op, lhs, rhs);
+                default -> new MolangExpr.Binary(op.binaryOp(), lhs, rhs);
             };
         }
 
@@ -86,7 +86,7 @@ public final class MolangParser {
     /**
      * Parses a possible left side expression.
      */
-    private @NotNull MolangExpr lhs() {
+    private MolangExpr lhs() {
         MolangLexer.Tok token = lexer.next();
         if (token == null) throw new IllegalStateException("unexpected end of input");
 
@@ -175,12 +175,16 @@ public final class MolangParser {
 
         private final int lbp;
         private final int rbp;
-        private final MolangExpr.Binary.Op op;
+        private final @Nullable MolangExpr.Binary.Op op;
 
-        Operator(int lbp, int rbp, MolangExpr.Binary.Op op) {
+        Operator(int lbp, int rbp, @Nullable MolangExpr.Binary.Op op) {
             this.lbp = lbp;
             this.rbp = rbp;
             this.op = op;
+        }
+
+        public MolangExpr.Binary.Op binaryOp() {
+            return Objects.requireNonNull(this.op, () -> this.op + " is not a binary operator");
         }
 
         public int prefixBindingPower() {
