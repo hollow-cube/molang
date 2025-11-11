@@ -76,6 +76,10 @@ public final class MolangParser {
                         throw new IllegalStateException("rhs of member access must be an ident, was " + rhs);
                     yield new MolangExpr.Access(lhs, value);
                 }
+                case ARRAY_ACCESS -> {
+                    lexer.expect(MolangLexer.Tok.RSQUARE);
+                    yield new MolangExpr.ArrayAccess(lhs, rhs);
+                }
                 default -> new MolangExpr.Binary(op.binaryOp(), lhs, rhs);
             };
         }
@@ -93,6 +97,7 @@ public final class MolangParser {
         return switch (token) {
             case NUMBER -> new MolangExpr.Num(Double.parseDouble(lexer.span()));
             case IDENT -> new MolangExpr.Ident(lexer.span());
+            case STRING -> new MolangExpr.Str(lexer.span().substring(1, lexer.span().length() - 1));
             case MINUS -> {
                 var rhs = expr(Operator.MINUS.prefixBindingPower());
                 yield new MolangExpr.Unary(MolangExpr.Unary.Op.NEGATE, rhs);
@@ -130,6 +135,7 @@ public final class MolangParser {
             case SLASH -> Operator.DIV;
             case STAR -> Operator.MUL;
             case DOT -> Operator.MEMBER_ACCESS;
+            case LSQUARE -> Operator.ARRAY_ACCESS;
             case QUESTION -> Operator.TERNARY;
             case QUESTIONQUESTION -> Operator.NULL_COALESCE;
             case LPAREN -> Operator.LPAREN;
@@ -168,6 +174,7 @@ public final class MolangParser {
         OR(19, 20, MolangExpr.Binary.Op.OR),
 
         TERNARY(0, 0, null), // Open of a ternary expression (?), only a postfix operator
+        ARRAY_ACCESS(0, 0, null), // TODO see if just putting 0 for binding power is allowed, seems to working fine from testing
 
         NULL_COALESCE(5, 6, MolangExpr.Binary.Op.NULL_COALESCE),
 

@@ -5,11 +5,12 @@ import org.jetbrains.annotations.Nullable;
 final class MolangLexer {
     public enum Tok {
         PLUS, MINUS, STAR, SLASH,
-        LPAREN, RPAREN, LBRACE, RBRACK,
+        LPAREN, RPAREN, LBRACE, RBRACK, LSQUARE, RSQUARE,
         DOT, COMMA, COLON, QUESTION, QUESTIONQUESTION,
         GTEQ, GT, LTEQ, LT, EQEQ, BANGEQ, SEMICOLON,
         AMPAMP, BARBAR, BANG,
-        NUMBER, IDENT;
+        NUMBER, IDENT, STRING,
+        ;
     }
 
     private final String source;
@@ -38,6 +39,8 @@ final class MolangLexer {
             return ident();
         if (isDigit(c))
             return number();
+        if (c == '\'')
+            return string();
 
         return symbol(c);
     }
@@ -97,6 +100,15 @@ final class MolangLexer {
         return Tok.NUMBER;
     }
 
+    private Tok string() {
+        // Molang does not allow escaping so we can simply just go until the next single quote
+        while (peek0() != '\'' && !atEnd())
+            advance();
+
+        advance();
+        return Tok.STRING;
+    }
+
     private Tok symbol(char c) {
         return switch (c) {
             case '+' -> Tok.PLUS;
@@ -111,6 +123,8 @@ final class MolangLexer {
             case ')' -> Tok.RPAREN;
             case '{' -> Tok.LBRACE;
             case '}' -> Tok.RBRACK;
+            case '[' -> Tok.LSQUARE;
+            case ']' -> Tok.RSQUARE;
             case ';' -> Tok.SEMICOLON;
             case '>' -> match('=') ? Tok.GTEQ : Tok.GT;
             case '<' -> match('=') ? Tok.LTEQ : Tok.LT;

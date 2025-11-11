@@ -93,6 +93,14 @@ public sealed interface MolangExpr {
         }
     }
 
+    record ArrayAccess(MolangExpr lhs, MolangExpr index) implements MolangExpr {
+
+        @Override
+        public String toString() {
+            return String.format("%s[%s]", lhs, index);
+        }
+    }
+
     record Call(MolangExpr lhs, List<MolangExpr> args) implements MolangExpr {
 
         @Override

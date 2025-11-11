@@ -17,6 +17,7 @@ final class MolangPrinter {
             case MolangExpr.Ternary(var cond, var thenExpr, var elseExpr) -> String.format("(? %s %s %s)",
                     print(cond), print(thenExpr), print(elseExpr));
             case MolangExpr.Access(var lhs, var field) -> String.format("(. %s %s)", print(lhs), field);
+            case MolangExpr.ArrayAccess(var lhs, var index) -> String.format("([ %s %s)", print(lhs), print(index));
             case MolangExpr.Call(var lhs, var args) -> String.format("(? %s %s)", print(lhs),
                     args.stream().map(MolangPrinter::print).collect(Collectors.joining(" ")));
             case MolangExpr.Block(var exprs) -> exprs.isEmpty() ? "{ }" : String.format("{ %s }", exprs.stream()

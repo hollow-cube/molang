@@ -1,6 +1,7 @@
 package net.hollowcube.molang.eval;
 
 import net.hollowcube.molang.MolangParser;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -16,7 +17,20 @@ public class TestMolangEvaluator {
     @ParameterizedTest(name = "{0}")
     public void testInputPairs(String name, String input, String expected) {
         var expr = new MolangParser(input).parse();
-        var actual = new MolangEvaluator(Map.of()).eval(expr);
+        var actual = new MolangEvaluator(Map.of(
+                "array", new MolangValue.Array() {
+
+                    @Override
+                    public int size() {
+                        return 1;
+                    }
+
+                    @Override
+                    public @NotNull MolangValue get(int index) {
+                        return new MolangValue.Num(42);
+                    }
+                }
+        )).eval(expr);
 
         assertEquals(expected, String.valueOf(actual));
     }
@@ -50,7 +64,11 @@ public class TestMolangEvaluator {
                 Arguments.of("ease_in_out_cubic 1",
                         "m.ease_in_out_cubic(0, 1, 0.5)", "0.5"),
                 Arguments.of("ease_in_out_cubic 2",
-                        "m.ease_in_out_cubic(0, 1, 0.75)", "0.9375")
+                        "m.ease_in_out_cubic(0, 1, 0.75)", "0.9375"),
+                Arguments.of("array access",
+                        "array[0]", "42.0"),
+                Arguments.of("array access with complex index and wrapping",
+                        "array[math.floor(math.sin(100)) + array[0]] + math.floor(1.4)", "43.0")
         );
     }
 

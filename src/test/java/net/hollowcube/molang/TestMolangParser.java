@@ -25,6 +25,8 @@ public class TestMolangParser {
                         "1", "1.0"),
                 Arguments.of("basic ref",
                         "abc", "abc"),
+                Arguments.of("string literal",
+                        "'hello'", "'hello'"),
                 Arguments.of("basic add",
                         "1 + 2", "(+ 1.0 2.0)"),
                 Arguments.of("nested add",
@@ -58,7 +60,9 @@ public class TestMolangParser {
                 Arguments.of("lt eq precedence 1",
                         "1 < 2 == 3", "(== (< 1.0 2.0) 3.0)"),
                 Arguments.of("lt eq precedence 2",
-                        "1 == 2 < 3", "(== 1.0 (< 2.0 3.0))")
+                        "1 == 2 < 3", "(== 1.0 (< 2.0 3.0))"),
+                Arguments.of("array access",
+                        "arr[2]", "([ arr 2.0)")
         );
     }
 }

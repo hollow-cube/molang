@@ -35,6 +35,11 @@ public class TestMolangLexer {
                 Arguments.of("??", MolangLexer.Tok.QUESTIONQUESTION),
                 Arguments.of("(", MolangLexer.Tok.LPAREN),
                 Arguments.of(")", MolangLexer.Tok.RPAREN),
+                Arguments.of("{", MolangLexer.Tok.LBRACE),
+                Arguments.of("}", MolangLexer.Tok.RBRACK),
+                Arguments.of("[", MolangLexer.Tok.LSQUARE),
+                Arguments.of("]", MolangLexer.Tok.RSQUARE),
+                Arguments.of(";", MolangLexer.Tok.SEMICOLON),
                 Arguments.of("!", MolangLexer.Tok.BANG),
                 Arguments.of("!=", MolangLexer.Tok.BANGEQ),
                 Arguments.of("==", MolangLexer.Tok.EQEQ),
@@ -43,13 +48,18 @@ public class TestMolangLexer {
                 Arguments.of("<", MolangLexer.Tok.LT),
                 Arguments.of("<=", MolangLexer.Tok.LTEQ),
 
+                Arguments.of("&&", MolangLexer.Tok.AMPAMP),
+                Arguments.of("||", MolangLexer.Tok.BARBAR),
+
                 Arguments.of("123", MolangLexer.Tok.NUMBER),
                 Arguments.of("123.", MolangLexer.Tok.NUMBER),
                 Arguments.of("123.456", MolangLexer.Tok.NUMBER),
 
                 Arguments.of("abc", MolangLexer.Tok.IDENT),
                 Arguments.of("aBc", MolangLexer.Tok.IDENT),
-                Arguments.of("aBc1", MolangLexer.Tok.IDENT)
+                Arguments.of("aBc1", MolangLexer.Tok.IDENT),
+
+                Arguments.of("'hello'", MolangLexer.Tok.STRING)
         );
     }
 }

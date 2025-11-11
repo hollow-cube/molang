@@ -74,6 +74,11 @@ public final class MolangOptimizer {
                 }
                 yield new MolangExpr.Access(lhs, access.field());
             }
+            case MolangExpr.ArrayAccess access -> {
+                final MolangExpr lhs = optimizeAst(access.lhs());
+                final MolangExpr index = optimizeAst(access.index());
+                yield new MolangExpr.ArrayAccess(lhs, index);
+            }
             case MolangExpr.Call call -> {
                 final MolangExpr lhs = optimizeAst(call.lhs());
                 final List<MolangExpr> args = new ArrayList<>();

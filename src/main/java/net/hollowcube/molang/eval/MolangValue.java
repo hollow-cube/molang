@@ -50,4 +50,15 @@ public sealed interface MolangValue {
         }
     }
 
+    non-sealed interface Array extends MolangValue {
+
+        int size();
+
+        MolangValue get(int index);
+
+        interface Mutable extends Array {
+            void set(int index, MolangValue value);
+        }
+    }
+
 }

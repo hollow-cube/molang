@@ -64,6 +64,7 @@ public final class MolangEvaluator {
                 case MolangExpr.Str str -> new MolangValue.Str(str.value());
                 case MolangExpr.Ident ident -> evalIdent(ident);
                 case MolangExpr.Access access -> evalAccess(access);
+                case MolangExpr.ArrayAccess access -> evalArrayAccess(access);
                 case MolangExpr.Unary unary -> evalUnary(unary);
                 case MolangExpr.Binary binary -> evalBinary(binary);
                 case MolangExpr.Ternary ternary -> evalTernary(ternary);
@@ -112,6 +113,18 @@ public final class MolangEvaluator {
         if (value instanceof MolangValue.Function func)
             return evalCallInternal(func, List.of());
         return value;
+    }
+
+    private MolangValue evalArrayAccess(MolangExpr.ArrayAccess arrayAccess) {
+        final MolangValue lhs = evalExpr(arrayAccess.lhs());
+        if (!(lhs instanceof MolangValue.Array array)) {
+            errors.add(new ContentError("Cannot access index on non-array: " + lhs));
+            return MolangValue.NIL;
+        }
+
+        final MolangValue indexValue = evalExpr(arrayAccess.index());
+        final int index = (int) unwrapNumber(indexValue, () -> "Array index must be a number, got: " + indexValue);
+        return array.get(Math.max(0, index) % array.size());
     }
 
     private MolangValue evalUnary(MolangExpr.Unary unary) {
