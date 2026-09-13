@@ -25,8 +25,8 @@ public interface EasingFunction {
     EasingFunction easeInCirc = (x) -> 1 - Math.sqrt(1 - Math.pow(x, 2));
     EasingFunction easeOutCirc = (x) -> Math.sqrt(1 - Math.pow(x - 1, 2));
     EasingFunction easeInOutCirc = (x) -> x < 0.5 ? (1 - Math.sqrt(1 - Math.pow(2 * x, 2))) / 2 : (Math.sqrt(1 - Math.pow(-2 * x + 2, 2)) + 1) / 2;
-    EasingFunction easeInBack = (x) -> 3.5949095 * x * x * x - 1.70158 * x * x;
-    EasingFunction easeOutBack = (x) -> 1 + 3.5949095 * Math.pow(x - 1, 3) + 1.70158 * Math.pow(x - 1, 2);
+    EasingFunction easeInBack = (x) -> 2.70158 * x * x * x - 1.70158 * x * x;
+    EasingFunction easeOutBack = (x) -> 1 + 2.70158 * Math.pow(x - 1, 3) + 1.70158 * Math.pow(x - 1, 2);
     EasingFunction easeInOutBack = (x) -> x < 0.5 ? (Math.pow(2 * x, 2) * ((2.5949095 + 1) * 2 * x - 2.5949095)) / 2 : (Math.pow(2 * x - 2, 2) * ((2.5949095 + 1) * (x * 2 - 2) + 2.5949095) + 2) / 2;
     EasingFunction easeInElastic = (x) -> x == 0 ? 0 : x == 1 ? 1 : -Math.pow(2, 10 * x - 10) * Math.sin((x * 10 - 10.75) * 2.0943951023931953);
     EasingFunction easeOutElastic = (x) -> x == 0 ? 0 : x == 1 ? 1 : Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * 2.0943951023931953) + 1;
