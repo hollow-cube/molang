@@ -42,12 +42,8 @@ Programs are compiled once and evaluated many times, and variables persist in th
 ```java
 var counter = MolangProgram.compile("v.x = (v.x ?? 0) + 1; v.x");
 var state = new MolangState();
-counter.
-
-eval(state); // 1.0
-counter.
-
-eval(state); // 2.0
+counter.eval(state); // 1.0
+counter.eval(state); // 2.0
 ```
 
 Compile source into a `MolangProgram` against a `MolangEnvironment`, which describes the names expressions can read,
