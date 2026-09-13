@@ -1060,7 +1060,10 @@ public final class MolangProgram<T> {
             MolangValue value = args[0].value(s, c);
             if (!(value instanceof MolangValue.Str(String text))) {
                 if (value == FAILED) return 0.0;
-                s.error("Expected a string for argument 1 of " + name + ", got " + value, position);
+                s.error(
+                    "Expected a string for argument 1 of " + name + ", got " + value,
+                    args[0].position
+                );
                 return 0.0;
             }
             try {

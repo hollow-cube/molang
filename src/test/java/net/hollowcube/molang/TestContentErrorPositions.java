@@ -13,6 +13,7 @@ public class TestContentErrorPositions {
     static final MolangEnvironment<Object> ENV = MolangEnvironment.builder()
         .query(
             q -> q.function("half", (ctx, a) -> a / 2)
+                .stringFunction("eq", (ctx, a) -> a.equals("x") ? 1 : 0)
                 .function("checked", (ctx, a) -> {
                     throw new MolangContentException("checked: bad input");
                 })
@@ -34,6 +35,7 @@ public class TestContentErrorPositions {
     public void testCallErrorsAreAtTheCallOrArgument() {
         assertEquals(List.of("1:5"), locations("1 + math.sqrt(-1)"));
         assertEquals(List.of("1:8"), locations("q.half('a')"));
+        assertEquals(List.of("1:6"), locations("q.eq(1)"));
         assertEquals(List.of("1:1"), locations("q.checked(1)"));
         assertEquals(List.of("1:1"), locations("q.half(1, 2)"));
     }
