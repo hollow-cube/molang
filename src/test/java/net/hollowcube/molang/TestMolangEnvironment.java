@@ -117,7 +117,7 @@ public class TestMolangEnvironment {
             .build();
         var state = new MolangState();
 
-        assertEquals(1, environment.compile("q.checked(1) + q.broken + 1").eval(state));
+        assertEquals(1, environment.compile("q.checked(1) + q.broken + 1").eval(state, null));
         assertEquals(2, state.getErrors().size());
         assertEquals("checked: bad input", state.getErrors().getFirst().message());
     }
@@ -202,9 +202,9 @@ public class TestMolangEnvironment {
             .global(g -> g.variadic("seven", (ctx, args) -> 7 + args.length).constant("answer", 42))
             .build();
         var state = new MolangState();
-        assertEquals(7, environment.compile("seven()").eval(state));
-        assertEquals(7, environment.compile("seven").eval(state));
-        assertEquals(8, environment.compile("seven(1)").eval(state));
+        assertEquals(7, environment.compile("seven()").eval(state, null));
+        assertEquals(7, environment.compile("seven").eval(state, null));
+        assertEquals(8, environment.compile("seven(1)").eval(state, null));
         assertEquals(42, environment.compile("answer").eval(state));
         assertEquals(List.of(), state.getErrors());
     }
@@ -275,7 +275,7 @@ public class TestMolangEnvironment {
         var state = new MolangState();
         assertEquals(
             3,
-            environment.compile("q.known + q.is_anything + (q.other ?? 1)").eval(state)
+            environment.compile("q.known + q.is_anything + (q.other ?? 1)").eval(state, null)
         );
         assertEquals(List.of(), state.getErrors());
     }
@@ -298,7 +298,8 @@ public class TestMolangEnvironment {
         var state = new MolangState();
         assertEquals(
             59,
-            environment.compile("answer + seven + Seven(1) - 1 + a.b + (nope ?? 1)").eval(state)
+            environment.compile("answer + seven + Seven(1) - 1 + a.b + (nope ?? 1)")
+                .eval(state, null)
         );
         assertEquals(List.of(), state.getErrors());
 
@@ -350,6 +351,20 @@ public class TestMolangEnvironment {
             false,
             KEYFRAMES.compile("q.is_on_ground")
                 .evalBool(state, new Keyframe(0, new Entity(false, "", 0)))
+        );
+    }
+
+    @Test
+    public void testEvalWithoutContextOnlyWithoutHostValues() {
+        var state = new MolangState();
+        assertEquals(12, KEYFRAMES.compile("remap(0, 8, 0.5) + c.scale / 2").eval(state));
+        assertThrows(
+            IllegalStateException.class,
+            () -> KEYFRAMES.compile("q.anim_time").eval(state)
+        );
+        assertThrows(
+            IllegalStateException.class,
+            () -> KEYFRAMES.compile("q.is_on_ground").evalBool(state)
         );
     }
 

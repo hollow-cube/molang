@@ -73,8 +73,14 @@ public final class MolangProgram<T> {
         }
     }
 
-    /// Evaluates the program without a context, for environments whose functions do not use one.
+    /// Evaluates a program that reads no host values, eg one from [#compile(String)].
+    ///
+    /// @throws IllegalStateException if the program reads host or dynamic names (see [#analysis()]),
+    ///                               whose functions would receive a null context. Pass the context,
+    ///                               or null explicitly if the functions do not use one.
     public double eval(MolangState state) {
+        if (!analysis.hostNames().isEmpty() || !analysis.dynamicNames().isEmpty())
+            throw new IllegalStateException("Program reads host values, so it needs a context");
         return eval(state, null);
     }
 
@@ -82,6 +88,7 @@ public final class MolangProgram<T> {
         return eval(state, context) != 0.0;
     }
 
+    /// Evaluates a program that reads no host values as a boolean, as [#eval(MolangState)].
     public boolean evalBool(MolangState state) {
         return eval(state) != 0.0;
     }

@@ -98,7 +98,7 @@ public class TestContentErrorPositions {
 
     private static List<ContentError> errors(String source) {
         var state = new MolangState();
-        ENV.compile(source).eval(state);
+        ENV.compile(source).eval(state, null);
         return state.getErrors();
     }
 
