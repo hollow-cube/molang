@@ -115,6 +115,15 @@ public sealed interface MolangExpr {
         }
     }
 
+    /// `return value`, which stops evaluation of the whole expression and yields value.
+    record Return(MolangExpr value) implements MolangExpr {
+
+        @Override
+        public String toString() {
+            return "return " + value;
+        }
+    }
+
     record Call(MolangExpr lhs, List<MolangExpr> args) implements MolangExpr {
 
         @Override

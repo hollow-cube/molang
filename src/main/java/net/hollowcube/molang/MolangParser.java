@@ -127,7 +127,17 @@ public final class MolangParser {
 
         return switch (token) {
             case NUMBER -> new MolangExpr.Num(Double.parseDouble(lexer.span()));
-            case IDENT -> new MolangExpr.Ident(lexer.span());
+            case IDENT -> {
+                var name = lexer.span();
+                if (!name.equals("return")) yield new MolangExpr.Ident(name);
+                // A bare `return` yields 0
+                var next = lexer.peek();
+                if (next == null
+                    || next == MolangLexer.Tok.SEMICOLON
+                    || next == MolangLexer.Tok.RBRACK)
+                    yield new MolangExpr.Return(new MolangExpr.Num(0));
+                yield new MolangExpr.Return(expr(0));
+            }
             case MINUS -> {
                 var rhs = expr(Operator.MINUS.prefixBindingPower());
                 yield new MolangExpr.Unary(MolangExpr.Unary.Op.NEGATE, rhs);

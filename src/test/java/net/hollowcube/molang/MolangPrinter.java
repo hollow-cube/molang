@@ -39,6 +39,7 @@ final class MolangPrinter {
                 var target,
                 var value
             ) -> String.format("(= %s %s)", print(target), print(value));
+            case MolangExpr.Return(var value) -> String.format("(return %s)", print(value));
             case MolangExpr.Block(
                 var exprs
             ) -> exprs.isEmpty()

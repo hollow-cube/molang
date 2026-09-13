@@ -54,6 +54,14 @@ public class TestMolangParser {
             Arguments.of("blank statements", "\n1;\n\n;2;\n", "{ 1.0; 2.0 }"),
             Arguments.of("block without final semicolon", "{1; 2}", "{ 1.0; 2.0 }"),
             Arguments.of("empty block", "loop(2, {})", "(? loop 2.0 { })"),
+            Arguments.of("return", "return 1 + 2", "(return (+ 1.0 2.0))"),
+            Arguments.of("bare return", "return;", "(return 0.0)"),
+            Arguments.of("return in block", "{return;}", "{ (return 0.0) }"),
+            Arguments.of(
+                "return statement",
+                "v.x = 1; return v.x",
+                "{ (= (. v x) 1.0); (return (. v x)) }"
+            ),
             Arguments.of("normalize case 1", "q.is_alive()", "(. q is_alive)"),
             Arguments.of("empty call operand", "q.is_alive() + 1", "(+ (. q is_alive) 1.0)"),
             Arguments.of("trailing whitespace", "1 + 2 \n", "(+ 1.0 2.0)"),

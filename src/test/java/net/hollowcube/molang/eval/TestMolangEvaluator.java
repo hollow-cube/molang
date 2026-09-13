@@ -72,11 +72,34 @@ public class TestMolangEvaluator {
             Arguments.of("1;2;", 2),
             Arguments.of("v.i = 0; loop(3, {v.i = v.i + 1;}); v.i", 3),
             Arguments.of("{v.q = 4; v.q + 1}", 5),
+            Arguments.of("return 7; 8", 7),
+            Arguments.of("return;", 0),
+            Arguments.of("v.a = 1; return v.a + 1; v.a = 9", 2),
+            Arguments.of("1 ? {return 3;} : 4; 9", 3),
+            Arguments.of(
+                "v.i = 0; loop(10, {v.i = v.i + 1; v.i == 3 ? {return v.i * 10;} : 0;}); 99",
+                30
+            ),
+            Arguments.of(
+                "t.turn = 15;\nreturn t.turn * math.cos(q.anim_time * 360);\n",
+                -4.63525491562421
+            ),
+            Arguments.of(
+                "v.progress = math.cos(q.life_time * 360 - 22.5) * 0.5 + 0.5;\nv.ease = v.progress < 0.5\n      ? 4 * v.progress * v.progress * v.progress\n      : 1 - math.pow(-2 * v.progress + 2, 3) / 2;\n\nreturn v.ease;",
+                0.02153908114499394
+            ),
             Arguments.of(
                 "v.freq = 2;\nv.mag = 45;\nv.balloon = 2;\nv.offset = 0;\nv.time_offset = 0;\n\nmath.atan(v.balloon * math.sin((q.anim_time + v.time_offset) * 180 * v.freq)) / math.atan(v.balloon) * v.mag + v.offset",
                 44.171966508167216
             )
         );
+    }
+
+    @Test
+    public void testReturnSkipsLaterStatements() {
+        var evaluator = new MolangEvaluator(Map.of());
+        assertEquals(2, eval(evaluator, "v.a = 1; return v.a + 1; v.a = 9"));
+        assertEquals(1, eval(evaluator, "v.a"));
     }
 
     private static double eval(MolangEvaluator evaluator, String input) {

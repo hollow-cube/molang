@@ -96,6 +96,7 @@ public final class MolangOptimizer {
                 assign.target(),
                 optimizeAst(assign.value())
             );
+            case MolangExpr.Return ret -> new MolangExpr.Return(optimizeAst(ret.value()));
             case MolangExpr.Block block -> {
                 var optimizedExprs = new ArrayList<MolangExpr>();
                 for (MolangExpr subExpr : block.exprs()) optimizedExprs.add(optimizeAst(subExpr));

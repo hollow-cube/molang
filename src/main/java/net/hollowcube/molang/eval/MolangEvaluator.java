@@ -73,6 +73,7 @@ public final class MolangEvaluator {
                 case MolangExpr.Block block -> evalBlock(block);
                 case MolangExpr.Call call -> evalCall(call);
                 case MolangExpr.Assign assign -> evalAssign(assign);
+                case MolangExpr.Return ret -> throw new Return(evalExpr(ret.value()));
             };
         } catch (Break | Continue value) {
             if (!loopScope) {
@@ -94,8 +95,6 @@ public final class MolangEvaluator {
         return switch (ident.value()) {
             case "continue" -> throw new Continue();
             case "break" -> throw new Break();
-            // TODO: return value? probably will end up as its own expr
-            case "return" -> throw new Return(MolangValue.NIL);
             case "loop" -> LOOP_FUNC;
             case "for_each" -> {
                 this.errors.add(new ContentError("'for_each' expressions are not supported"));
