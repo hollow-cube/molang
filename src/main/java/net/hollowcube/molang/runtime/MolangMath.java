@@ -284,8 +284,8 @@ public final class MolangMath {
     }
 
     /// Returns the normalized progress between start and end given value
-    public static double inverseLerp(double start, double end, double zeroToOne) {
-        return lerp(start, end, 1 - zeroToOne);
+    public static double inverseLerp(double start, double end, double value) {
+        return (value - start) / (end - start);
     }
 
     /// Lerp from start to end via zeroToOne. zeroToOne is not clamped, so values outside [0, 1] extrapolate.

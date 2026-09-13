@@ -30,7 +30,12 @@ public class TestMolangMath {
                 Arguments.of("math.lerp(2, 10, 0.25)", 4),
                 Arguments.of("math.lerp(10, 2, 0.25)", 8),
                 Arguments.of("math.lerp(2, 10, 1.5)", 14),
-                Arguments.of("math.lerp(2, 10, -0.5)", -2)
+                Arguments.of("math.lerp(2, 10, -0.5)", -2),
+
+                Arguments.of("math.inverse_lerp(2, 10, 4)", 0.25),
+                Arguments.of("math.inverse_lerp(10, 2, 2)", 1),
+                Arguments.of("math.inverse_lerp(2, 10, 12)", 1.25),
+                Arguments.of("math.inverse_lerp(2, 10, -4)", -0.75)
         );
     }
 
