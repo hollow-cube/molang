@@ -29,9 +29,8 @@ final class MolangLexer {
     public @Nullable Tok next() {
         start = cursor;
 
-        if (atEnd()) return null;
-
         consumeWhitespace();
+        if (atEnd()) return null;
 
         char c = advance();
         if (isAlpha(c))
