@@ -39,7 +39,8 @@ public sealed interface MolangExpr {
 
     record Unary(Op op, MolangExpr rhs) implements MolangExpr {
         public enum Op {
-            NEGATE, NOT
+            NEGATE,
+            NOT,
         }
 
         @Override
@@ -53,11 +54,20 @@ public sealed interface MolangExpr {
 
     record Binary(Op op, MolangExpr lhs, MolangExpr rhs) implements MolangExpr {
         public enum Op {
-            PLUS("+"), MINUS("-"), DIV("/"), MUL("*"),
+            PLUS("+"),
+            MINUS("-"),
+            DIV("/"),
+            MUL("*"),
             NULL_COALESCE("??"),
-            GTE(">="), GT(">"), LTE(">="), LT("<"),
-            EQ("=="), NEQ("!="),
-            AND("&&"), OR("||");
+            GTE(">="),
+            GT(">"),
+            LTE(">="),
+            LT("<"),
+            EQ("=="),
+            NEQ("!="),
+            AND("&&"),
+            OR("||"),
+            ;
 
             private final String symbol;
 
@@ -76,8 +86,11 @@ public sealed interface MolangExpr {
         }
     }
 
-    record Ternary(MolangExpr cond, MolangExpr thenExpr,
-                   MolangExpr elseExpr) implements MolangExpr {
+    record Ternary(
+        MolangExpr cond,
+        MolangExpr thenExpr,
+        MolangExpr elseExpr
+    ) implements MolangExpr {
 
         @Override
         public String toString() {
@@ -97,7 +110,10 @@ public sealed interface MolangExpr {
 
         @Override
         public String toString() {
-            return lhs + "(" + args.stream().map(MolangExpr::toString).collect(Collectors.joining(", ")) + ")";
+            return lhs
+                + "("
+                + args.stream().map(MolangExpr::toString).collect(Collectors.joining(", "))
+                + ")";
         }
     }
 
@@ -108,9 +124,10 @@ public sealed interface MolangExpr {
             if (exprs.isEmpty()) {
                 return "{}";
             }
-            return "{" + exprs.stream().map(MolangExpr::toString).collect(Collectors.joining("; ")) + "}";
+            return "{"
+                + exprs.stream().map(MolangExpr::toString).collect(Collectors.joining("; "))
+                + "}";
         }
     }
 
 }
-

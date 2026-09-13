@@ -75,17 +75,17 @@ public class TestMolangMath {
 
     private static Stream<String> domainErrors() {
         return Stream.of(
-                "math.sqrt(-1)",
-                "math.ln(0)",
-                "math.ln(-1)",
-                "math.mod(5, 0)",
-                "math.asin(1.5)",
-                "math.asin(-1.5)",
-                "math.acos(1.5)",
-                "math.acos(-1.5)",
-                "math.pow(-8, 0.5)",
-                "math.pow(0, -1)",
-                "math.inverse_lerp(2, 2, 3)"
+            "math.sqrt(-1)",
+            "math.ln(0)",
+            "math.ln(-1)",
+            "math.mod(5, 0)",
+            "math.asin(1.5)",
+            "math.asin(-1.5)",
+            "math.acos(1.5)",
+            "math.acos(-1.5)",
+            "math.pow(-8, 0.5)",
+            "math.pow(0, -1)",
+            "math.inverse_lerp(2, 2, 3)"
         );
     }
 
@@ -109,41 +109,39 @@ public class TestMolangMath {
             Arguments.of("math.lerprotate(30, 300, 1.5)", 75),
             Arguments.of("math.lerprotate(0, 180, 0.5)", 90),
             Arguments.of("math.lerprotate(0, 181, 0.5)", 270.5),
-            Arguments.of("math.sign(0)", 0),
-                Arguments.of("math.sign(2.5)", 1),
-                Arguments.of("math.sign(-0.5)", -1),
-
-                Arguments.of("math.sqrt(0)", 0),
-                Arguments.of("math.ln(1)", 0),
-                Arguments.of("math.pow(-2, 3)", -8),
-                Arguments.of("math.pow(0, 0)", 1),
-                Arguments.of("math.asin(1)", 90),
-                Arguments.of("math.acos(-1)", 180),
-
-                Arguments.of("math.ease_in_out_back(2, 10, 0)", 2),
-                Arguments.of("math.ease_in_out_back(2, 10, 0.1)", 1.699851584),
-                Arguments.of("math.ease_in_out_back(2, 10, 0.25)", 1.20254525),
-                Arguments.of("math.ease_in_out_back(2, 10, 0.5)", 6),
-                Arguments.of("math.ease_in_out_back(2, 10, 0.75)", 10.79745475),
-                Arguments.of("math.ease_in_out_back(2, 10, 0.9)", 10.300148415999999),
-                Arguments.of("math.ease_in_out_back(2, 10, 1)", 10),
-
-                Arguments.of("math.ease_out_cubic(2, 10, 0)", 2),
-                Arguments.of("math.ease_out_cubic(2, 10, 0.1)", 4.167999999999999),
-                Arguments.of("math.ease_out_cubic(2, 10, 0.5)", 9),
-                Arguments.of("math.ease_out_cubic(2, 10, 0.75)", 9.875),
-                Arguments.of("math.ease_out_cubic(2, 10, 1)", 10),
-
-                Arguments.of("math.ease_in_back(2, 10, 0)", 2),
-                Arguments.of("math.ease_in_back(2, 10, 0.25)", 1.4869075),
-                Arguments.of("math.ease_in_back(2, 10, 0.5)", 1.2984199999999997),
-                Arguments.of("math.ease_in_back(2, 10, 0.9)", 6.729376159999999),
-                Arguments.of("math.ease_in_back(2, 10, 1)", 9.999999999999998),
-                Arguments.of("math.ease_out_back(2, 10, 0)", 2.0000000000000018),
-                Arguments.of("math.ease_out_back(2, 10, 0.1)", 5.270623840000001),
-                Arguments.of("math.ease_out_back(2, 10, 0.5)", 10.70158),
-                Arguments.of("math.ease_out_back(2, 10, 0.75)", 10.5130925),
-                Arguments.of("math.ease_out_back(2, 10, 1)", 10)
+            Arguments.of(
+                "math.sign(0)",
+                 0),
+            Arguments.of("math.sign(2.5)", 1),
+            Arguments.of("math.sign(-0.5)", -1),
+            Arguments.of("math.sqrt(0)", 0),
+            Arguments.of("math.ln(1)", 0),
+            Arguments.of("math.pow(-2, 3)", -8),
+            Arguments.of("math.pow(0, 0)", 1),
+            Arguments.of("math.asin(1)", 90),
+            Arguments.of("math.acos(-1)", 180),
+            Arguments.of("math.ease_in_out_back(2, 10, 0)", 2),
+            Arguments.of("math.ease_in_out_back(2, 10, 0.1)", 1.699851584),
+            Arguments.of("math.ease_in_out_back(2, 10, 0.25)", 1.20254525),
+            Arguments.of("math.ease_in_out_back(2, 10, 0.5)", 6),
+            Arguments.of("math.ease_in_out_back(2, 10, 0.75)", 10.79745475),
+            Arguments.of("math.ease_in_out_back(2, 10, 0.9)", 10.300148415999999),
+            Arguments.of("math.ease_in_out_back(2, 10, 1)", 10),
+            Arguments.of("math.ease_out_cubic(2, 10, 0)", 2),
+            Arguments.of("math.ease_out_cubic(2, 10, 0.1)", 4.167999999999999),
+            Arguments.of("math.ease_out_cubic(2, 10, 0.5)", 9),
+            Arguments.of("math.ease_out_cubic(2, 10, 0.75)", 9.875),
+            Arguments.of("math.ease_out_cubic(2, 10, 1)", 10),
+            Arguments.of("math.ease_in_back(2, 10, 0)", 2),
+            Arguments.of("math.ease_in_back(2, 10, 0.25)", 1.4869075),
+            Arguments.of("math.ease_in_back(2, 10, 0.5)", 1.2984199999999997),
+            Arguments.of("math.ease_in_back(2, 10, 0.9)", 6.729376159999999),
+            Arguments.of("math.ease_in_back(2, 10, 1)", 9.999999999999998),
+            Arguments.of("math.ease_out_back(2, 10, 0)", 2.0000000000000018),
+            Arguments.of("math.ease_out_back(2, 10, 0.1)", 5.270623840000001),
+            Arguments.of("math.ease_out_back(2, 10, 0.5)", 10.70158),
+            Arguments.of("math.ease_out_back(2, 10, 0.75)", 10.5130925),
+            Arguments.of("math.ease_out_back(2, 10, 1)", 10)
         );
     }
 

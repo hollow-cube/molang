@@ -78,7 +78,9 @@ public final class MolangParser {
             lhs = switch (op) {
                 case MEMBER_ACCESS -> {
                     if (!(rhs instanceof MolangExpr.Ident(String value)))
-                        throw new IllegalStateException("rhs of member access must be an ident, was " + rhs);
+                        throw new IllegalStateException(
+                            "rhs of member access must be an ident, was " + rhs
+                        );
                     yield new MolangExpr.Access(lhs, value);
                 }
                 default -> new MolangExpr.Binary(op.binaryOp(), lhs, rhs);
@@ -176,7 +178,8 @@ public final class MolangParser {
 
         NULL_COALESCE(5, 6, MolangExpr.Binary.Op.NULL_COALESCE),
 
-        LPAREN(30, 30, null);
+        LPAREN(30, 30, null),
+        ;
 
         private final int lbp;
         private final int rbp;

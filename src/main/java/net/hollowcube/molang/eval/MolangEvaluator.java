@@ -42,7 +42,10 @@ public final class MolangEvaluator {
         errors.clear();
         temp.clear();
         final MolangValue value = Return.catching(() -> evalExpr(expr));
-        return unwrapNumber(value, () -> "Expected number, got: " + value + ", check errors for details.");
+        return unwrapNumber(
+            value,
+            () -> "Expected number, got: " + value + ", check errors for details."
+        );
     }
 
     public boolean evalBool(MolangExpr expr) {
@@ -73,8 +76,13 @@ public final class MolangEvaluator {
         } catch (Break | Continue value) {
             if (!loopScope) {
                 // Outside of a loop break and continue just result in a content error.
-                errors.add(new ContentError(
-                        "Cannot use " + (value instanceof Break ? "break" : "continue") + " outside of a loop"));
+                errors.add(
+                    new ContentError(
+                        "Cannot use "
+                            + (value instanceof Break ? "break" : "continue")
+                            + " outside of a loop"
+                    )
+                );
                 return MolangValue.NIL;
             }
             throw value;
@@ -109,31 +117,36 @@ public final class MolangEvaluator {
 
         final MolangValue value = holder.get(access.field());
         // If the value is a function, we should call it with zero args.
-        if (value instanceof MolangValue.Function func)
-            return evalCallInternal(func, List.of());
+        if (value instanceof MolangValue.Function func) return evalCallInternal(func, List.of());
         return value;
     }
 
     private MolangValue evalUnary(MolangExpr.Unary unary) {
         var rhs = evalExpr(unary.rhs());
         return switch (unary.op()) {
-            case NEGATE -> new MolangValue.Num(-unwrapNumber(rhs,
-                    () -> "Cannot apply unary '-' to: " + rhs));
-            case NOT -> new MolangValue.Num(!unwrapBoolean(rhs,
-                    () -> "Cannot apply '!' to: " + rhs) ? 1.0 : 0.0);
+            case NEGATE -> new MolangValue.Num(
+                -unwrapNumber(rhs, () -> "Cannot apply unary '-' to: " + rhs)
+            );
+            case NOT -> new MolangValue.Num(
+                !unwrapBoolean(rhs, () -> "Cannot apply '!' to: " + rhs) ? 1.0 : 0.0
+            );
         };
     }
 
     private MolangValue evalBinary(MolangExpr.Binary binary) {
         final MolangValue lhs = evalExpr(binary.lhs());
         if (binary.op() == MolangExpr.Binary.Op.NULL_COALESCE) {
-            if (lhs instanceof MolangValue.Nil)
-                return evalExpr(binary.rhs());
+            if (lhs instanceof MolangValue.Nil) return evalExpr(binary.rhs());
             return lhs;
         }
 
         final MolangValue rhs = evalExpr(binary.rhs());
-        Supplier<String> error = () -> "Cannot apply operator: " + lhs + " " + binary.op().symbol() + " " + rhs;
+        Supplier<String> error = () -> "Cannot apply operator: "
+            + lhs
+            + " "
+            + binary.op().symbol()
+            + " "
+            + rhs;
         return switch (binary.op()) {
             case PLUS -> new MolangValue.Num(unwrapNumber(lhs, error) + unwrapNumber(rhs, error));
             case MINUS -> new MolangValue.Num(unwrapNumber(lhs, error) - unwrapNumber(rhs, error));
@@ -155,15 +168,25 @@ public final class MolangEvaluator {
                 if (lhs instanceof MolangValue.Num || rhs instanceof MolangValue.Num) {
                     double lhsValue = unwrapNumber(lhs, error);
                     double rhsValue = unwrapNumber(rhs, error);
-                    yield new MolangValue.Num(binary.op() == MolangExpr.Binary.Op.EQ
-                            ? lhsValue == rhsValue : lhsValue != rhsValue);
+                    yield new MolangValue.Num(
+                        binary.op() == MolangExpr.Binary.Op.EQ
+                            ? lhsValue == rhsValue
+                            : lhsValue != rhsValue
+                    );
                 }
                 // If both are strings, compare them
-                if (lhs instanceof MolangValue.Str(var lhsValue) && rhs instanceof MolangValue.Str(var rhsValue)) {
-                    yield new MolangValue.Num((binary.op() == MolangExpr.Binary.Op.EQ) == lhsValue.equals(rhsValue));
+                if (lhs instanceof MolangValue.Str(var lhsValue)
+                    && rhs instanceof MolangValue.Str(var rhsValue)) {
+                    yield new MolangValue.Num(
+                        (binary.op() == MolangExpr.Binary.Op.EQ) == lhsValue.equals(rhsValue)
+                    );
                 }
                 // Otherwise we do not know how to compare.
-                errors.add(new ContentError("Cannot apply operator: " + lhs + " " + binary.op().symbol() + " " + rhs));
+                errors.add(
+                    new ContentError(
+                        "Cannot apply operator: " + lhs + " " + binary.op().symbol() + " " + rhs
+                    )
+                );
                 yield new MolangValue.Num(0);
             }
             case AND -> new MolangValue.Num(unwrapBoolean(lhs, error) && unwrapBoolean(rhs, error));
@@ -175,21 +198,24 @@ public final class MolangEvaluator {
 
     private MolangValue evalTernary(MolangExpr.Ternary ternary) {
         final MolangValue conditionValue = evalExpr(ternary.cond());
-        final boolean condition = unwrapBoolean(conditionValue,
-                () -> "Condition must be a number, not: " + ternary);
+        final boolean condition = unwrapBoolean(
+            conditionValue,
+            () -> "Condition must be a number, not: " + ternary
+        );
         return condition ? evalExpr(ternary.thenExpr()) : evalExpr(ternary.elseExpr());
     }
 
     private MolangValue evalBlock(MolangExpr.Block block) {
-        for (var expr : block.exprs())
-            evalExpr(expr); // Eval and ignore the results
+        for (var expr : block.exprs()) evalExpr(expr); // Eval and ignore the results
         return MolangValue.NIL;
     }
 
     private MolangValue evalCall(MolangExpr.Call call) {
         final MolangValue lhs = switch (call.lhs()) {
-            case MolangExpr.Access access -> evalExpr(access.lhs()) instanceof MolangValue.Holder holder
-                    ? holder.get(access.field()) : MolangValue.NIL;
+            case MolangExpr.Access access -> evalExpr(access.lhs())
+                instanceof MolangValue.Holder holder
+                ? holder.get(access.field())
+                : MolangValue.NIL;
             default -> evalExpr(call.lhs());
         };
         if (lhs == LOOP_FUNC) {
@@ -205,7 +231,9 @@ public final class MolangEvaluator {
         for (var arg : call.args()) {
             var value = evalExpr(arg);
             if (value instanceof MolangValue.Nil) {
-                errors.add(new ContentError("Cannot pass 'nil' as an argument to a function: " + call));
+                errors.add(
+                    new ContentError("Cannot pass 'nil' as an argument to a function: " + call)
+                );
                 args.add(new MolangValue.Num(0.0)); // Replace nil with 0.0
                 continue;
             }
@@ -223,7 +251,9 @@ public final class MolangEvaluator {
             errors.add(e.toContentError());
             return new MolangValue.Num(0.0);
         } catch (Exception e) {
-            errors.add(new ContentError("Error while calling function: " + func + ": " + e.getMessage()));
+            errors.add(
+                new ContentError("Error while calling function: " + func + ": " + e.getMessage())
+            );
         }
         return MolangValue.NIL;
     }
@@ -234,10 +264,16 @@ public final class MolangEvaluator {
             return;
         }
         final MolangValue iterCountValue = evalExpr(args.getFirst());
-        final int iterCount = (int) unwrapNumber(iterCountValue,
-                () -> "loop requires a number as the first argument, got: " + iterCountValue);
+        final int iterCount = (int) unwrapNumber(
+            iterCountValue,
+            () -> "loop requires a number as the first argument, got: " + iterCountValue
+        );
         if (!(args.getLast() instanceof MolangExpr.Block)) {
-            errors.add(new ContentError("loop requires a block as the second argument, got: " + args.getLast()));
+            errors.add(
+                new ContentError(
+                    "loop requires a block as the second argument, got: " + args.getLast()
+                )
+            );
             return;
         }
 
@@ -246,7 +282,11 @@ public final class MolangEvaluator {
         try {
             for (int i = 0; i < iterCount; i++) {
                 if (loopCounter-- <= 0) {
-                    errors.add(new ContentError("Loop counter exceeded maximum limit of " + MAX_LOOP_COUNTER));
+                    errors.add(
+                        new ContentError(
+                            "Loop counter exceeded maximum limit of " + MAX_LOOP_COUNTER
+                        )
+                    );
                     return;
                 }
 
@@ -268,19 +308,16 @@ public final class MolangEvaluator {
     }
 
     private double unwrapNumber(MolangValue value, Supplier<String> errorSupplier) {
-        if (value instanceof MolangValue.Num(double val))
-            return val;
+        if (value instanceof MolangValue.Num(double val)) return val;
         errors.add(new ContentError(errorSupplier.get()));
         return 0.0;
     }
 
     // Control flow exceptions below
 
-    private static class Break extends RuntimeException {
-    }
+    private static class Break extends RuntimeException {}
 
-    private static class Continue extends RuntimeException {
-    }
+    private static class Continue extends RuntimeException {}
 
     private static class Return extends RuntimeException {
         public static MolangValue catching(Supplier<MolangValue> supplier) {

@@ -35,20 +35,13 @@ public class TestMolangOptimizer {
 
     private static Stream<Arguments> inputPairs() {
         return Stream.of(
-                Arguments.of("basic number",
-                        "1", "1.0"),
-                Arguments.of("basic arithmetic",
-                        "4*(2+3)", "20.0"),
-                Arguments.of("basic arithmetic 2",
-                        "-4", "-4.0"),
-                Arguments.of("math func",
-                        "math.lerp(0, 10, 0.5)", "5.0"),
-                Arguments.of("invalid math func",
-                        "math.lerp(0, 10)", "(? (. math lerp) 0.0 10.0)"),
-                Arguments.of("division by zero",
-                        "1 / (2 - 2)", "(/ 1.0 0.0)"),
-                Arguments.of("invalid query func",
-                        "q.anim_time + 5", "(+ (. q anim_time) 5.0)")
+            Arguments.of("basic number", "1", "1.0"),
+            Arguments.of("basic arithmetic", "4*(2+3)", "20.0"),
+            Arguments.of("basic arithmetic 2", "-4", "-4.0"),
+            Arguments.of("math func", "math.lerp(0, 10, 0.5)", "5.0"),
+            Arguments.of("invalid math func", "math.lerp(0, 10)", "(? (. math lerp) 0.0 10.0)"),
+            Arguments.of("division by zero", "1 / (2 - 2)", "(/ 1.0 0.0)"),
+            Arguments.of("invalid query func", "q.anim_time + 5", "(+ (. q anim_time) 5.0)")
         );
     }
 

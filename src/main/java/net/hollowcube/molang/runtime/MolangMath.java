@@ -7,12 +7,17 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class MolangMath {
-    private static final int DIE_ROLL_ITERATION_LIMIT = Integer.getInteger("molang.die-roll-iteration-limit", 100);
+    private static final int DIE_ROLL_ITERATION_LIMIT = Integer.getInteger(
+        "molang.die-roll-iteration-limit",
+        100
+    );
 
     public static final MolangValue.Holder MODULE = new HolderImpl();
     public static final Set<String> IMPURE_METHODS = Set.of(
-            "die_roll", "die_roll_integer",
-            "random", "random_integer"
+        "die_roll",
+        "die_roll_integer",
+        "random",
+        "random_integer"
     );
 
     private static void assertion(boolean condition, String message) {
@@ -409,247 +414,247 @@ public final class MolangMath {
     // Gross glue below
 
     private static final class HolderImpl implements MolangValue.Holder {
-        private static final MolangValue.Function ABS = (rawArgs) -> {
+        private static final MolangValue.Function ABS = rawArgs -> {
             double[] args = checkArgs("abs", rawArgs, 1);
             return new MolangValue.Num(abs(args[0]));
         };
-        private static final MolangValue.Function ACOS = (rawArgs) -> {
+        private static final MolangValue.Function ACOS = rawArgs -> {
             double[] args = checkArgs("acos", rawArgs, 1);
             return new MolangValue.Num(acos(args[0]));
         };
-        private static final MolangValue.Function ASIN = (rawArgs) -> {
+        private static final MolangValue.Function ASIN = rawArgs -> {
             double[] args = checkArgs("asin", rawArgs, 1);
             return new MolangValue.Num(asin(args[0]));
         };
-        private static final MolangValue.Function ATAN = (rawArgs) -> {
+        private static final MolangValue.Function ATAN = rawArgs -> {
             double[] args = checkArgs("atan", rawArgs, 1);
             return new MolangValue.Num(atan(args[0]));
         };
-        private static final MolangValue.Function ATAN2 = (rawArgs) -> {
+        private static final MolangValue.Function ATAN2 = rawArgs -> {
             double[] args = checkArgs("atan2", rawArgs, 2);
             return new MolangValue.Num(atan2(args[0], args[1]));
         };
-        private static final MolangValue.Function CEIL = (rawArgs) -> {
+        private static final MolangValue.Function CEIL = rawArgs -> {
             double[] args = checkArgs("ceil", rawArgs, 1);
             return new MolangValue.Num(ceil(args[0]));
         };
-        private static final MolangValue.Function CLAMP = (rawArgs) -> {
+        private static final MolangValue.Function CLAMP = rawArgs -> {
             double[] args = checkArgs("clamp", rawArgs, 3);
             return new MolangValue.Num(clamp(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function COPY_SIGN = (rawArgs) -> {
+        private static final MolangValue.Function COPY_SIGN = rawArgs -> {
             double[] args = checkArgs("copy_sign", rawArgs, 2);
             return new MolangValue.Num(copySign(args[0], args[1]));
         };
-        private static final MolangValue.Function COS = (rawArgs) -> {
+        private static final MolangValue.Function COS = rawArgs -> {
             double[] args = checkArgs("cos", rawArgs, 1);
             return new MolangValue.Num(cos(args[0]));
         };
-        private static final MolangValue.Function DIE_ROLL = (rawArgs) -> {
+        private static final MolangValue.Function DIE_ROLL = rawArgs -> {
             double[] args = checkArgs("die_roll", rawArgs, 3);
             return new MolangValue.Num(dieRoll(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function DIE_ROLL_INTEGER = (rawArgs) -> {
+        private static final MolangValue.Function DIE_ROLL_INTEGER = rawArgs -> {
             double[] args = checkArgs("die_roll_integer", rawArgs, 3);
             return new MolangValue.Num(dieRollInteger(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_BACK = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_BACK = rawArgs -> {
             double[] args = checkArgs("ease_in_back", rawArgs, 3);
             return new MolangValue.Num(easeInBack(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_BOUNCE = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_BOUNCE = rawArgs -> {
             double[] args = checkArgs("ease_in_bounce", rawArgs, 3);
             return new MolangValue.Num(easeInBounce(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_CIRC = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_CIRC = rawArgs -> {
             double[] args = checkArgs("ease_in_circ", rawArgs, 3);
             return new MolangValue.Num(easeInCirc(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_CUBIC = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_CUBIC = rawArgs -> {
             double[] args = checkArgs("ease_in_cubic", rawArgs, 3);
             return new MolangValue.Num(easeInCubic(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_ELASTIC = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_ELASTIC = rawArgs -> {
             double[] args = checkArgs("ease_in_elastic", rawArgs, 3);
             return new MolangValue.Num(easeInElastic(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_EXPO = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_EXPO = rawArgs -> {
             double[] args = checkArgs("ease_in_expo", rawArgs, 3);
             return new MolangValue.Num(easeInExpo(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_OUT_BACK = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_OUT_BACK = rawArgs -> {
             double[] args = checkArgs("ease_in_out_back", rawArgs, 3);
             return new MolangValue.Num(easeInOutBack(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_OUT_BOUNCE = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_OUT_BOUNCE = rawArgs -> {
             double[] args = checkArgs("ease_in_out_bounce", rawArgs, 3);
             return new MolangValue.Num(easeInOutBounce(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_OUT_CIRC = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_OUT_CIRC = rawArgs -> {
             double[] args = checkArgs("ease_in_out_circ", rawArgs, 3);
             return new MolangValue.Num(easeInOutCirc(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_OUT_CUBIC = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_OUT_CUBIC = rawArgs -> {
             double[] args = checkArgs("ease_in_out_cubic", rawArgs, 3);
             return new MolangValue.Num(easeInOutCubic(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_OUT_ELASTIC = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_OUT_ELASTIC = rawArgs -> {
             double[] args = checkArgs("ease_in_out_elastic", rawArgs, 3);
             return new MolangValue.Num(easeInOutElastic(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_OUT_EXPO = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_OUT_EXPO = rawArgs -> {
             double[] args = checkArgs("ease_in_out_expo", rawArgs, 3);
             return new MolangValue.Num(easeInOutExpo(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_OUT_QUAD = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_OUT_QUAD = rawArgs -> {
             double[] args = checkArgs("ease_in_out_quad", rawArgs, 3);
             return new MolangValue.Num(easeInOutQuad(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_OUT_QUART = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_OUT_QUART = rawArgs -> {
             double[] args = checkArgs("ease_in_out_quart", rawArgs, 3);
             return new MolangValue.Num(easeInOutQuart(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_OUT_QUINT = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_OUT_QUINT = rawArgs -> {
             double[] args = checkArgs("ease_in_out_quint", rawArgs, 3);
             return new MolangValue.Num(easeInOutQuint(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_OUT_SINE = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_OUT_SINE = rawArgs -> {
             double[] args = checkArgs("ease_in_out_sine", rawArgs, 3);
             return new MolangValue.Num(easeInOutSine(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_QUAD = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_QUAD = rawArgs -> {
             double[] args = checkArgs("ease_in_quad", rawArgs, 3);
             return new MolangValue.Num(easeInQuad(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_QUART = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_QUART = rawArgs -> {
             double[] args = checkArgs("ease_in_quart", rawArgs, 3);
             return new MolangValue.Num(easeInQuart(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_QUINT = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_QUINT = rawArgs -> {
             double[] args = checkArgs("ease_in_quint", rawArgs, 3);
             return new MolangValue.Num(easeInQuint(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_SINE = (rawArgs) -> {
+        private static final MolangValue.Function EASE_IN_SINE = rawArgs -> {
             double[] args = checkArgs("ease_in_sine", rawArgs, 3);
             return new MolangValue.Num(easeInSine(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_OUT_BACK = (rawArgs) -> {
+        private static final MolangValue.Function EASE_OUT_BACK = rawArgs -> {
             double[] args = checkArgs("ease_out_back", rawArgs, 3);
             return new MolangValue.Num(easeOutBack(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_OUT_BOUNCE = (rawArgs) -> {
+        private static final MolangValue.Function EASE_OUT_BOUNCE = rawArgs -> {
             double[] args = checkArgs("ease_out_bounce", rawArgs, 3);
             return new MolangValue.Num(easeOutBounce(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_OUT_CIRC = (rawArgs) -> {
+        private static final MolangValue.Function EASE_OUT_CIRC = rawArgs -> {
             double[] args = checkArgs("ease_out_circ", rawArgs, 3);
             return new MolangValue.Num(easeOutCirc(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_OUT_CUBIC = (rawArgs) -> {
+        private static final MolangValue.Function EASE_OUT_CUBIC = rawArgs -> {
             double[] args = checkArgs("ease_out_cubic", rawArgs, 3);
             return new MolangValue.Num(easeOutCubic(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_OUT_ELASTIC = (rawArgs) -> {
+        private static final MolangValue.Function EASE_OUT_ELASTIC = rawArgs -> {
             double[] args = checkArgs("ease_out_elastic", rawArgs, 3);
             return new MolangValue.Num(easeOutElastic(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_OUT_EXPO = (rawArgs) -> {
+        private static final MolangValue.Function EASE_OUT_EXPO = rawArgs -> {
             double[] args = checkArgs("ease_out_expo", rawArgs, 3);
             return new MolangValue.Num(easeOutExpo(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_OUT_QUAD = (rawArgs) -> {
+        private static final MolangValue.Function EASE_OUT_QUAD = rawArgs -> {
             double[] args = checkArgs("ease_out_quad", rawArgs, 3);
             return new MolangValue.Num(easeOutQuad(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_OUT_QUART = (rawArgs) -> {
+        private static final MolangValue.Function EASE_OUT_QUART = rawArgs -> {
             double[] args = checkArgs("ease_out_quart", rawArgs, 3);
             return new MolangValue.Num(easeOutQuart(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_OUT_QUINT = (rawArgs) -> {
+        private static final MolangValue.Function EASE_OUT_QUINT = rawArgs -> {
             double[] args = checkArgs("ease_out_quint", rawArgs, 3);
             return new MolangValue.Num(easeOutQuint(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_OUT_SINE = (rawArgs) -> {
+        private static final MolangValue.Function EASE_OUT_SINE = rawArgs -> {
             double[] args = checkArgs("ease_out_sine", rawArgs, 3);
             return new MolangValue.Num(easeOutSine(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EXP = (rawArgs) -> {
+        private static final MolangValue.Function EXP = rawArgs -> {
             double[] args = checkArgs("exp", rawArgs, 1);
             return new MolangValue.Num(exp(args[0]));
         };
-        private static final MolangValue.Function FLOOR = (rawArgs) -> {
+        private static final MolangValue.Function FLOOR = rawArgs -> {
             double[] args = checkArgs("floor", rawArgs, 1);
             return new MolangValue.Num(floor(args[0]));
         };
-        private static final MolangValue.Function HERMITE_BLEND = (rawArgs) -> {
+        private static final MolangValue.Function HERMITE_BLEND = rawArgs -> {
             double[] args = checkArgs("hermite_blend", rawArgs, 1);
             return new MolangValue.Num(hermiteBlend(args[0]));
         };
-        private static final MolangValue.Function INVERSE_LERP = (rawArgs) -> {
+        private static final MolangValue.Function INVERSE_LERP = rawArgs -> {
             double[] args = checkArgs("inverse_lerp", rawArgs, 3);
             return new MolangValue.Num(inverseLerp(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function LERP = (rawArgs) -> {
+        private static final MolangValue.Function LERP = rawArgs -> {
             double[] args = checkArgs("lerp", rawArgs, 3);
             return new MolangValue.Num(lerp(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function LERP_ROTATE = (rawArgs) -> {
+        private static final MolangValue.Function LERP_ROTATE = rawArgs -> {
             double[] args = checkArgs("lerp_rotate", rawArgs, 3);
             return new MolangValue.Num(lerprotate(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function LN = (rawArgs) -> {
+        private static final MolangValue.Function LN = rawArgs -> {
             double[] args = checkArgs("ln", rawArgs, 1);
             return new MolangValue.Num(ln(args[0]));
         };
-        private static final MolangValue.Function MAX = (rawArgs) -> {
+        private static final MolangValue.Function MAX = rawArgs -> {
             double[] args = checkArgs("max", rawArgs, 2);
             return new MolangValue.Num(max(args[0], args[1]));
         };
-        private static final MolangValue.Function MIN = (rawArgs) -> {
+        private static final MolangValue.Function MIN = rawArgs -> {
             double[] args = checkArgs("min", rawArgs, 2);
             return new MolangValue.Num(min(args[0], args[1]));
         };
-        private static final MolangValue.Function MIN_ANGLE = (rawArgs) -> {
+        private static final MolangValue.Function MIN_ANGLE = rawArgs -> {
             double[] args = checkArgs("min_angle", rawArgs, 1);
             return new MolangValue.Num(minAngle(args[0]));
         };
-        private static final MolangValue.Function MOD = (rawArgs) -> {
+        private static final MolangValue.Function MOD = rawArgs -> {
             double[] args = checkArgs("mod", rawArgs, 2);
             return new MolangValue.Num(mod(args[0], args[1]));
         };
-        private static final MolangValue.Function PI = (rawArgs) -> {
+        private static final MolangValue.Function PI = rawArgs -> {
             checkArgs("pi", rawArgs, 0);
             return new MolangValue.Num(pi());
         };
-        private static final MolangValue.Function POW = (rawArgs) -> {
+        private static final MolangValue.Function POW = rawArgs -> {
             double[] args = checkArgs("pow", rawArgs, 2);
             return new MolangValue.Num(pow(args[0], args[1]));
         };
-        private static final MolangValue.Function RANDOM = (rawArgs) -> {
+        private static final MolangValue.Function RANDOM = rawArgs -> {
             double[] args = checkArgs("random", rawArgs, 2);
             return new MolangValue.Num(random(args[0], args[1]));
         };
-        private static final MolangValue.Function RANDOM_INTEGER = (rawArgs) -> {
+        private static final MolangValue.Function RANDOM_INTEGER = rawArgs -> {
             double[] args = checkArgs("random_integer", rawArgs, 2);
             return new MolangValue.Num(randomInteger(args[0], args[1]));
         };
-        private static final MolangValue.Function ROUND = (rawArgs) -> {
+        private static final MolangValue.Function ROUND = rawArgs -> {
             double[] args = checkArgs("round", rawArgs, 1);
             return new MolangValue.Num(round(args[0]));
         };
-        private static final MolangValue.Function SIGN = (rawArgs) -> {
+        private static final MolangValue.Function SIGN = rawArgs -> {
             double[] args = checkArgs("sign", rawArgs, 1);
             return new MolangValue.Num(sign(args[0]));
         };
-        private static final MolangValue.Function SIN = (rawArgs) -> {
+        private static final MolangValue.Function SIN = rawArgs -> {
             double[] args = checkArgs("sin", rawArgs, 1);
             return new MolangValue.Num(sin(args[0]));
         };
-        private static final MolangValue.Function SQRT = (rawArgs) -> {
+        private static final MolangValue.Function SQRT = rawArgs -> {
             double[] args = checkArgs("sqrt", rawArgs, 1);
             return new MolangValue.Num(sqrt(args[0]));
         };
-        private static final MolangValue.Function TRUNC = (rawArgs) -> {
+        private static final MolangValue.Function TRUNC = rawArgs -> {
             double[] args = checkArgs("trunc", rawArgs, 1);
             return new MolangValue.Num(trunc(args[0]));
         };
@@ -725,7 +730,8 @@ public final class MolangMath {
         private static double[] checkArgs(String name, List<MolangValue> args, int expected) {
             if (args.size() != expected)
                 throw new MolangContentException(
-                        "Expected %d arguments got %d for %s".formatted(expected, args.size(), name));
+                    "Expected %d arguments got %d for %s".formatted(expected, args.size(), name)
+                );
             double[] result = new double[expected];
             for (int i = 0; i < expected; i++) {
                 // TODO: this needs to generate a content error...

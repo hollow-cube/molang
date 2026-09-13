@@ -4,12 +4,31 @@ import org.jetbrains.annotations.Nullable;
 
 final class MolangLexer {
     public enum Tok {
-        PLUS, MINUS, STAR, SLASH,
-        LPAREN, RPAREN, LBRACE, RBRACK,
-        DOT, COMMA, COLON, QUESTION, QUESTIONQUESTION,
-        GTEQ, GT, LTEQ, LT, EQEQ, BANGEQ, SEMICOLON,
-        AMPAMP, BARBAR, BANG,
-        NUMBER, IDENT;
+        PLUS,
+        MINUS,
+        STAR,
+        SLASH,
+        LPAREN,
+        RPAREN,
+        LBRACE,
+        RBRACK,
+        DOT,
+        COMMA,
+        COLON,
+        QUESTION,
+        QUESTIONQUESTION,
+        GTEQ,
+        GT,
+        LTEQ,
+        LT,
+        EQEQ,
+        BANGEQ,
+        SEMICOLON,
+        AMPAMP,
+        BARBAR,
+        BANG,
+        NUMBER,
+        IDENT,
     }
 
     private final String source;
@@ -33,10 +52,8 @@ final class MolangLexer {
         if (atEnd()) return null;
 
         char c = advance();
-        if (isAlpha(c))
-            return ident();
-        if (isDigit(c))
-            return number();
+        if (isAlpha(c)) return ident();
+        if (isDigit(c)) return number();
 
         return symbol(c);
     }
@@ -55,8 +72,7 @@ final class MolangLexer {
 
     public void expect(Tok type) {
         var next = next();
-        if (next != type)
-            throw new IllegalStateException("Expected " + type + " but got " + next);
+        if (next != type) throw new IllegalStateException("Expected " + type + " but got " + next);
     }
 
     public String span() {
@@ -84,13 +100,11 @@ final class MolangLexer {
 
     private Tok number() {
         // Pre decimal
-        while (isDigit(peek0()))
-            advance();
+        while (isDigit(peek0())) advance();
 
         // Decimal, if present
         if (match('.')) {
-            while (isDigit(peek0()))
-                advance();
+            while (isDigit(peek0())) advance();
         }
 
         return Tok.NUMBER;
@@ -126,8 +140,7 @@ final class MolangLexer {
     }
 
     private char peek0() {
-        if (atEnd())
-            return '\u0000';
+        if (atEnd()) return '\u0000';
         return source.charAt(cursor);
     }
 
@@ -155,4 +168,3 @@ final class MolangLexer {
         throw new IllegalStateException(String.format("unexpected token '%s' at %d.", c, cursor));
     }
 }
-

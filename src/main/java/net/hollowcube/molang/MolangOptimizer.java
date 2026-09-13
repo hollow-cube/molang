@@ -18,10 +18,12 @@ public final class MolangOptimizer {
             case MolangExpr.Unary unary -> {
                 final MolangExpr rhs = optimizeAst(unary.rhs());
                 if (rhs instanceof MolangExpr.Num(double value)) {
-                    yield new MolangExpr.Num(switch (unary.op()) {
-                        case NEGATE -> -value;
-                        case NOT -> value == 0 ? 1.0 : 0.0;
-                    });
+                    yield new MolangExpr.Num(
+                        switch (unary.op()) {
+                            case NEGATE -> -value;
+                            case NOT -> value == 0 ? 1.0 : 0.0;
+                        }
+                    );
                 }
                 yield new MolangExpr.Unary(unary.op(), rhs);
             }
@@ -29,28 +31,29 @@ public final class MolangOptimizer {
                 final MolangExpr lhs = optimizeAst(binary.lhs());
                 final MolangExpr rhs = optimizeAst(binary.rhs());
                 // Division by zero is left to the evaluator, which reports it as a content error.
-                if (lhs instanceof MolangExpr.Num(double leftValue) && rhs instanceof MolangExpr.Num(
-                        double rightValue
-                ) && !(binary.op() == MolangExpr.Binary.Op.DIV && rightValue == 0)) {
-                    yield new MolangExpr.Num(switch (binary.op()) {
-                        case PLUS -> leftValue + rightValue;
-                        case MINUS -> leftValue - rightValue;
-                        case MUL -> leftValue * rightValue;
-                        case DIV -> leftValue / rightValue;
-                        case NULL_COALESCE -> leftValue != 0 ? leftValue : rightValue;
-                        case GTE -> leftValue >= rightValue ? 1.0 : 0.0;
-                        case GT -> leftValue > rightValue ? 1.0 : 0.0;
-                        case LTE -> leftValue <= rightValue ? 1.0 : 0.0;
-                        case LT -> leftValue < rightValue ? 1.0 : 0.0;
-                        case EQ -> leftValue == rightValue ? 1.0 : 0.0;
-                        case NEQ -> leftValue != rightValue ? 1.0 : 0.0;
-                        case AND -> leftValue != 0 && rightValue != 0 ? 1.0 : 0.0;
-                        case OR -> leftValue != 0 || rightValue != 0 ? 1.0 : 0.0;
-                    });
+                if (lhs instanceof MolangExpr.Num(double leftValue)
+                    && rhs instanceof MolangExpr.Num(double rightValue)
+                    && !(binary.op() == MolangExpr.Binary.Op.DIV && rightValue == 0)) {
+                    yield new MolangExpr.Num(
+                        switch (binary.op()) {
+                            case PLUS -> leftValue + rightValue;
+                            case MINUS -> leftValue - rightValue;
+                            case MUL -> leftValue * rightValue;
+                            case DIV -> leftValue / rightValue;
+                            case NULL_COALESCE -> leftValue != 0 ? leftValue : rightValue;
+                            case GTE -> leftValue >= rightValue ? 1.0 : 0.0;
+                            case GT -> leftValue > rightValue ? 1.0 : 0.0;
+                            case LTE -> leftValue <= rightValue ? 1.0 : 0.0;
+                            case LT -> leftValue < rightValue ? 1.0 : 0.0;
+                            case EQ -> leftValue == rightValue ? 1.0 : 0.0;
+                            case NEQ -> leftValue != rightValue ? 1.0 : 0.0;
+                            case AND -> leftValue != 0 && rightValue != 0 ? 1.0 : 0.0;
+                            case OR -> leftValue != 0 || rightValue != 0 ? 1.0 : 0.0;
+                        }
+                    );
                 }
-                if (lhs instanceof MolangExpr.Str(String leftValue) && rhs instanceof MolangExpr.Str(
-                        String rightValue
-                )) {
+                if (lhs instanceof MolangExpr.Str(String leftValue)
+                    && rhs instanceof MolangExpr.Str(String rightValue)) {
                     if (binary.op() == MolangExpr.Binary.Op.EQ)
                         yield new MolangExpr.Num(leftValue.equals(rightValue) ? 1.0 : 0.0);
                     if (binary.op() == MolangExpr.Binary.Op.NEQ)
@@ -69,7 +72,8 @@ public final class MolangOptimizer {
             case MolangExpr.Access access -> {
                 final MolangExpr lhs = optimizeAst(access.lhs());
                 // Math functions can be optimized specifically
-                if (lhs instanceof MolangExpr.Ident(var ident) && ("math".equals(ident) || "m".equals(ident))) {
+                if (lhs instanceof MolangExpr.Ident(var ident)
+                    && ("math".equals(ident) || "m".equals(ident))) {
                     final MolangExpr result = optimizeMathCall(access.field(), List.of());
                     if (result != null) yield result;
                 }
@@ -80,9 +84,9 @@ public final class MolangOptimizer {
                 final List<MolangExpr> args = new ArrayList<>();
                 for (MolangExpr arg : call.args()) args.add(optimizeAst(arg));
                 // Math functions can be optimized specifically
-                if (lhs instanceof MolangExpr.Access(var accessLhs, var field) &&
-                        accessLhs instanceof MolangExpr.Ident(var ident) &&
-                        ("math".equals(ident) || "m".equals(ident))) {
+                if (lhs instanceof MolangExpr.Access(var accessLhs, var field)
+                    && accessLhs instanceof MolangExpr.Ident(var ident)
+                    && ("math".equals(ident) || "m".equals(ident))) {
                     final MolangExpr result = optimizeMathCall(field, args);
                     if (result != null) yield result;
                 }
@@ -90,8 +94,7 @@ public final class MolangOptimizer {
             }
             case MolangExpr.Block block -> {
                 var optimizedExprs = new ArrayList<MolangExpr>();
-                for (MolangExpr subExpr : block.exprs())
-                    optimizedExprs.add(optimizeAst(subExpr));
+                for (MolangExpr subExpr : block.exprs()) optimizedExprs.add(optimizeAst(subExpr));
                 yield new MolangExpr.Block(List.copyOf(optimizedExprs));
             }
         };
@@ -122,7 +125,8 @@ public final class MolangOptimizer {
         try {
             final MolangValue result = ((MolangValue.Function) func).apply(argNumbers);
             return result instanceof MolangValue.Num(double value)
-                    ? new MolangExpr.Num(value) : null;
+                ? new MolangExpr.Num(value)
+                : null;
         } catch (Exception ignored) {
             return null; // Let it error at runtime properly
         }

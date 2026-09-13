@@ -25,34 +25,31 @@ public class TestMolangLexer {
 
     private static Stream<Arguments> individualSymbols() {
         return Stream.of(
-                Arguments.of("+", MolangLexer.Tok.PLUS),
-                Arguments.of("-", MolangLexer.Tok.MINUS),
-                Arguments.of("*", MolangLexer.Tok.STAR),
-                Arguments.of("/", MolangLexer.Tok.SLASH),
-                Arguments.of(".", MolangLexer.Tok.DOT),
-                Arguments.of(",", MolangLexer.Tok.COMMA),
-                Arguments.of("?", MolangLexer.Tok.QUESTION),
-                Arguments.of("??", MolangLexer.Tok.QUESTIONQUESTION),
-                Arguments.of("(", MolangLexer.Tok.LPAREN),
-                Arguments.of(")", MolangLexer.Tok.RPAREN),
-                Arguments.of("!", MolangLexer.Tok.BANG),
-                Arguments.of("!=", MolangLexer.Tok.BANGEQ),
-                Arguments.of("==", MolangLexer.Tok.EQEQ),
-                Arguments.of(">", MolangLexer.Tok.GT),
-                Arguments.of(">=", MolangLexer.Tok.GTEQ),
-                Arguments.of("<", MolangLexer.Tok.LT),
-                Arguments.of("<=", MolangLexer.Tok.LTEQ),
-
-                Arguments.of("123", MolangLexer.Tok.NUMBER),
-                Arguments.of("123.", MolangLexer.Tok.NUMBER),
-                Arguments.of("123.456", MolangLexer.Tok.NUMBER),
-
-                Arguments.of("abc", MolangLexer.Tok.IDENT),
-                Arguments.of("aBc", MolangLexer.Tok.IDENT),
-                Arguments.of("aBc1", MolangLexer.Tok.IDENT),
-
-                Arguments.of(" + ", MolangLexer.Tok.PLUS),
-                Arguments.of("123 \t\r\n", MolangLexer.Tok.NUMBER)
+            Arguments.of("+", MolangLexer.Tok.PLUS),
+            Arguments.of("-", MolangLexer.Tok.MINUS),
+            Arguments.of("*", MolangLexer.Tok.STAR),
+            Arguments.of("/", MolangLexer.Tok.SLASH),
+            Arguments.of(".", MolangLexer.Tok.DOT),
+            Arguments.of(",", MolangLexer.Tok.COMMA),
+            Arguments.of("?", MolangLexer.Tok.QUESTION),
+            Arguments.of("??", MolangLexer.Tok.QUESTIONQUESTION),
+            Arguments.of("(", MolangLexer.Tok.LPAREN),
+            Arguments.of(")", MolangLexer.Tok.RPAREN),
+            Arguments.of("!", MolangLexer.Tok.BANG),
+            Arguments.of("!=", MolangLexer.Tok.BANGEQ),
+            Arguments.of("==", MolangLexer.Tok.EQEQ),
+            Arguments.of(">", MolangLexer.Tok.GT),
+            Arguments.of(">=", MolangLexer.Tok.GTEQ),
+            Arguments.of("<", MolangLexer.Tok.LT),
+            Arguments.of("<=", MolangLexer.Tok.LTEQ),
+            Arguments.of("123", MolangLexer.Tok.NUMBER),
+            Arguments.of("123.", MolangLexer.Tok.NUMBER),
+            Arguments.of("123.456", MolangLexer.Tok.NUMBER),
+            Arguments.of("abc", MolangLexer.Tok.IDENT),
+            Arguments.of("aBc", MolangLexer.Tok.IDENT),
+            Arguments.of("aBc1", MolangLexer.Tok.IDENT),
+            Arguments.of(" + ", MolangLexer.Tok.PLUS),
+            Arguments.of("123 \t\r\n", MolangLexer.Tok.NUMBER)
         );
     }
 }
