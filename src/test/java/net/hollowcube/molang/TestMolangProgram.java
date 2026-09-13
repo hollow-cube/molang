@@ -193,6 +193,9 @@ public class TestMolangProgram {
         assertEquals(OptionalDouble.of(1.0), constant("0 || math.max(1, 2)"));
         assertEquals(OptionalDouble.of(12.0), constant("q.twice(3) * q.nested.x"));
         assertEquals(OptionalDouble.of(3.0), constant("q.typo ?? 3"));
+        assertEquals(OptionalDouble.of(3.0), constant("return 1 + 2"));
+        assertEquals(OptionalDouble.of(4.0), constant("return 4; q.anim_time"));
+        assertEquals(OptionalDouble.of(4.0), constant("1 ? {return 4;} : q.anim_time"));
         // Not constant, or an error that must be reported when evaluated
         for (String source : List.of(
             "1 / (2 - 2)",
@@ -204,7 +207,9 @@ public class TestMolangProgram {
             "q.count(1)",
             "math.random(1, 2)",
             "v.x = 1 + 2",
-            "return 1 + 2"
+            "v.x = 1; return 2",
+            "return 'str'",
+            "q.anim_time ? {return 1;} : 2"
         ))
             assertEquals(OptionalDouble.empty(), constant(source), source);
     }

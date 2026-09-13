@@ -50,6 +50,8 @@ public final class MolangProgram<T> {
         boolean empty = expr instanceof MolangExpr.Block(var exprs, _) && exprs.isEmpty();
         var compiler = new Compiler(environment, optimize);
         Node root = compiler.compile(expr);
+        // Returning a number from the top level is the same as being that number
+        if (optimize && root instanceof Return ret && ret.value instanceof NumConst k) root = k;
         var constant = !empty && root instanceof NumConst k
             ? OptionalDouble.of(k.value)
             : OptionalDouble.empty();
@@ -1369,11 +1371,19 @@ public final class MolangProgram<T> {
                         ? new NumTernary(k, t, o)
                         : new Ternary(k, t, o);
                 }
-                case MolangExpr.Block(List<MolangExpr> exprs, _) -> switch (exprs.size()) {
-                    case 0 -> new NumConst(0.0);
-                    case 1 -> compile(exprs.getFirst());
-                    default -> new Block(exprs.stream().map(this::compile).toArray(Node[]::new));
-                };
+                case MolangExpr.Block(List<MolangExpr> exprs, _) -> {
+                    if (exprs.isEmpty()) yield new NumConst(0.0);
+                    var statements = new ArrayList<Node>(exprs.size());
+                    for (MolangExpr statement : exprs) {
+                        Node node = compile(statement);
+                        statements.add(node);
+                        // Statements after a return never run
+                        if (optimize && node instanceof Return) break;
+                    }
+                    yield statements.size() == 1
+                        ? statements.getFirst()
+                        : new Block(statements.toArray(Node[]::new));
+                }
                 case MolangExpr.Call call -> call(call);
                 case MolangExpr.Assign(MolangExpr.Access target, MolangExpr value, _) -> {
                     if (target.lhs() instanceof MolangExpr.Ident(String scope, _)) {
