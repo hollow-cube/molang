@@ -288,11 +288,9 @@ public final class MolangMath {
         return lerp(start, end, 1 - zeroToOne);
     }
 
-    /// Lerp from start to end via zeroToOne
+    /// Lerp from start to end via zeroToOne. zeroToOne is not clamped, so values outside [0, 1] extrapolate.
     public static double lerp(double start, double end, double zeroToOne) {
-        //todo test me
-        zeroToOne = clamp(zeroToOne, 0, 1);
-        return start * zeroToOne + end * (1D - zeroToOne);
+        return start + (end - start) * zeroToOne;
     }
 
     /// Lerp the shortest direction around a circle from start degrees to end degrees via zeroToOne
