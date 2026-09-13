@@ -109,9 +109,7 @@ public class TestMolangMath {
             Arguments.of("math.lerprotate(30, 300, 1.5)", 75),
             Arguments.of("math.lerprotate(0, 180, 0.5)", 90),
             Arguments.of("math.lerprotate(0, 181, 0.5)", 270.5),
-            Arguments.of(
-                "math.sign(0)",
-                 0),
+            Arguments.of("math.sign(0)", 0),
             Arguments.of("math.sign(2.5)", 1),
             Arguments.of("math.sign(-0.5)", -1),
             Arguments.of("math.sqrt(0)", 0),
