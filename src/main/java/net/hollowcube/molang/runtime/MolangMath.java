@@ -679,6 +679,7 @@ public final class MolangMath {
                 case "ease_out_back" -> EASE_OUT_BACK;
                 case "ease_out_bounce" -> EASE_OUT_BOUNCE;
                 case "ease_out_circ" -> EASE_OUT_CIRC;
+                case "ease_out_cubic" -> EASE_OUT_CUBIC;
                 case "ease_out_elastic" -> EASE_OUT_ELASTIC;
                 case "ease_out_expo" -> EASE_OUT_EXPO;
                 case "ease_out_quad" -> EASE_OUT_QUAD;

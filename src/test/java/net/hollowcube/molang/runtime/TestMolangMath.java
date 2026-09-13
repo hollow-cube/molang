@@ -54,7 +54,13 @@ public class TestMolangMath {
                 Arguments.of("math.ease_in_out_back(2, 10, 0.5)", 6),
                 Arguments.of("math.ease_in_out_back(2, 10, 0.75)", 10.79745475),
                 Arguments.of("math.ease_in_out_back(2, 10, 0.9)", 10.300148415999999),
-                Arguments.of("math.ease_in_out_back(2, 10, 1)", 10)
+                Arguments.of("math.ease_in_out_back(2, 10, 1)", 10),
+
+                Arguments.of("math.ease_out_cubic(2, 10, 0)", 2),
+                Arguments.of("math.ease_out_cubic(2, 10, 0.1)", 4.167999999999999),
+                Arguments.of("math.ease_out_cubic(2, 10, 0.5)", 9),
+                Arguments.of("math.ease_out_cubic(2, 10, 0.75)", 9.875),
+                Arguments.of("math.ease_out_cubic(2, 10, 1)", 10)
         );
     }
 
