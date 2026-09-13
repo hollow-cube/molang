@@ -1502,8 +1502,10 @@ public final class MolangProgram<T> {
                 default -> {}
             }
 
-            Entry entry = environment.root.get(head);
+            var root = environment.root;
+            Entry entry = root.entries().get(head);
             if (entry != null) return walk(entry, canonical(entry, head), 1, path, args);
+            if (root.fallback() != null) return dynamic(root.fallback(), "", 0, path, args);
             return unresolved(written, args);
         }
 
@@ -1557,7 +1559,9 @@ public final class MolangProgram<T> {
             @Nullable List<MolangExpr> args
         ) {
             String rest = String.join(".", path.subList(index, path.size()));
-            dynamicNames.add(rest.isEmpty() ? canonical : canonical + "." + rest);
+            dynamicNames.add(
+                rest.isEmpty() ? canonical : canonical.isEmpty() ? rest : canonical + "." + rest
+            );
             return new ValueCall(String.join(".", path), compileArgs(args), resolver, rest);
         }
 

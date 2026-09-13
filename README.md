@@ -106,7 +106,7 @@ A namespace can hold:
 - `value` functions taking and returning any `MolangValue`, for what the typed forms cannot express.
 - `optionalNumber` values, which are null when missing (so `??` replaces them).
 - nested `namespace`s (eg `q.rider.yaw`), and `dynamic` namespaces whose names are only known at runtime. A namespace
-  can also have a `dynamic` fallback that answers every name it does not register.
+  (or the top level, through `global`) can also have a `dynamic` fallback that answers every name it does not register.
 
 `variables` binds read-only host values under `variable` (`v`), eg an entity's position as `v.x`; other variables stay
 the state's own unless that namespace has a `dynamic` fallback. `query` (`q`) and `context` (`c`) have builder methods,

@@ -281,6 +281,41 @@ public class TestMolangEnvironment {
     }
 
     @Test
+    public void testGlobalFallback() {
+        var environment = MolangEnvironment.<Object>builder()
+            .query(q -> q.constant("known", 1))
+            .global(
+                g -> g.constant("answer", 42)
+                    .dynamic(
+                        (ctx, name, args) -> switch (name) {
+                            case "seven" -> new MolangValue.Num(7 + args.size());
+                            case "a.b" -> new MolangValue.Num(2);
+                            default -> MolangValue.NULL;
+                        }
+                    )
+            )
+            .build();
+        var state = new MolangState();
+        assertEquals(
+            59,
+            environment.compile("answer + seven + Seven(1) - 1 + a.b + (nope ?? 1)").eval(state)
+        );
+        assertEquals(List.of(), state.getErrors());
+
+        var analysis = environment.compile("seven + a.b + q.known + q.typo + math.pi").analysis();
+        assertEquals(Set.of("seven", "a.b"), analysis.dynamicNames());
+        // Registered and built in namespaces are not answered by it
+        assertEquals(Set.of("query.typo"), analysis.unresolvedNames());
+
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> MolangEnvironment.builder()
+                .global(g -> g.dynamic((ctx, name, args) -> MolangValue.NULL))
+                .global(g -> g.dynamic((ctx, name, args) -> MolangValue.NULL))
+        );
+    }
+
+    @Test
     public void testOptionalNumbers() {
         var environment = MolangEnvironment.<Double>builder()
             .query(q -> q.optionalNumber("best_playtime", best -> best))

@@ -54,13 +54,17 @@ public final class MolangEnvironment<T> {
         "this"
     );
 
-    private static final MolangEnvironment<Object> EMPTY = new MolangEnvironment<>(Map.of(), null);
+    private static final MolangEnvironment<Object> EMPTY = new MolangEnvironment<>(
+        new Entry.Names("", Map.of(), null),
+        null
+    );
 
-    final Map<String, Entry> root;
+    /// The top level names, and the resolver registered with `global`, if any.
+    final Entry.Names root;
     /// Names the host binds under `variable`, or null if every variable is the state's own.
     final Entry.@Nullable Names variables;
 
-    private MolangEnvironment(Map<String, Entry> root, Entry.@Nullable Names variables) {
+    private MolangEnvironment(Entry.Names root, Entry.@Nullable Names variables) {
         this.root = root;
         this.variables = variables;
     }
@@ -113,7 +117,9 @@ public final class MolangEnvironment<T> {
             return this;
         }
 
-        /// Registers names at the top level, eg a function called as `name()`.
+        /// Registers names at the top level, eg a function called as `name()`. A
+        /// [Namespace#dynamic(DynamicResolver)] fallback here answers every top level name that is not
+        /// registered or built in.
         public Builder<T> global(Consumer<Namespace<T>> names) {
             names.accept(root);
             return this;
@@ -127,7 +133,7 @@ public final class MolangEnvironment<T> {
 
         public MolangEnvironment<T> build() {
             return new MolangEnvironment<>(
-                root.freeze(),
+                new Entry.Names(root.path, root.freeze(), root.fallback),
                 variables == null
                     ? null
                     : new Entry.Names(variables.path, variables.freeze(), variables.fallback)
@@ -246,7 +252,10 @@ public final class MolangEnvironment<T> {
         /// unresolved.
         public Namespace<T> dynamic(DynamicResolver<T> resolver) {
             if (fallback != null)
-                throw new IllegalArgumentException("'" + path + "' already has a dynamic resolver");
+                throw new IllegalArgumentException(
+                    (path.isEmpty() ? "The top level" : "'" + path + "'")
+                        + " already has a dynamic resolver"
+                );
             fallback = resolver;
             return this;
         }
