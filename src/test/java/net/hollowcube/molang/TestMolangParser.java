@@ -62,6 +62,31 @@ public class TestMolangParser {
                 "v.x = 1; return v.x",
                 "{ (= (. v x) 1.0); (return (. v x)) }"
             ),
+            Arguments.of("binary conditional", "a ? b", "(? a b 0.0)"),
+            Arguments.of("binary conditional takes the rest", "a ? b + c", "(? a (+ b c) 0.0)"),
+            Arguments.of(
+                "binary conditional in then branch",
+                "a ? b ? c : d",
+                "(? a (? b c 0.0) d)"
+            ),
+            Arguments.of(
+                "grouped conditional in then branch",
+                "a ? (b ? c : d)",
+                "(? a (? b c d) 0.0)"
+            ),
+            Arguments.of("conditional in else branch", "a ? b : c ? d", "(? a b (? c d 0.0))"),
+            Arguments.of(
+                "null coalesce binds looser than conditional",
+                "a ?? b ? c : d",
+                "(?? a (? b c d))"
+            ),
+            Arguments.of("null coalesce after conditional", "a ? b : c ?? d", "(?? (? a b c) d)"),
+            Arguments.of(
+                "null coalesce after binary conditional",
+                "a ? b ?? c",
+                "(?? (? a b 0.0) c)"
+            ),
+            Arguments.of("binary conditional assignment", "v.z = a ? b", "(= (. v z) (? a b 0.0))"),
             Arguments.of("normalize case 1", "q.is_alive()", "(. q is_alive)"),
             Arguments.of("empty call operand", "q.is_alive() + 1", "(+ (. q is_alive) 1.0)"),
             Arguments.of("trailing whitespace", "1 + 2 \n", "(+ 1.0 2.0)"),

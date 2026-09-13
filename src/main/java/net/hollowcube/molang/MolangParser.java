@@ -8,6 +8,9 @@ import java.util.Objects;
 
 public final class MolangParser {
     private final MolangLexer lexer;
+    // Whether we are in the then branch of a conditional, where (as in molangjs) the next `:` belongs
+    // to the outer conditional, so a nested `a ? b` cannot take an else branch unless it is grouped.
+    private boolean inThenBranch = false;
 
     public MolangParser(String source) {
         this(source, false);
@@ -63,9 +66,16 @@ public final class MolangParser {
 
                 lhs = switch (op) {
                     case TERNARY -> {
-                        var trueExpr = expr(0);
-                        lexer.expect(MolangLexer.Tok.COLON);
-                        var falseExpr = expr(postfixBindingPower);
+                        var outerThenBranch = inThenBranch;
+                        inThenBranch = true;
+                        var trueExpr = expr(CONDITIONAL_BRANCH_BINDING_POWER);
+                        inThenBranch = outerThenBranch;
+
+                        // Binary conditional `a ? b` is `a ? b : 0`
+                        if (inThenBranch || lexer.peek() != MolangLexer.Tok.COLON)
+                            yield new MolangExpr.Ternary(lhs, trueExpr, new MolangExpr.Num(0));
+                        lexer.next(); // Colon
+                        var falseExpr = expr(CONDITIONAL_BRANCH_BINDING_POWER);
                         yield new MolangExpr.Ternary(lhs, trueExpr, falseExpr);
                     }
                     case LPAREN -> {
@@ -75,7 +85,7 @@ public final class MolangParser {
 
                         if (next != null && next != MolangLexer.Tok.RPAREN) {
                             do {
-                                args.add(expr(0));
+                                args.add(grouped());
                                 next = lexer.peek();
                             } while (next == MolangLexer.Tok.COMMA && lexer.next() != null);
 
@@ -118,6 +128,15 @@ public final class MolangParser {
         return lhs;
     }
 
+    /// Parses an expression inside brackets or an argument list, where a conditional may take its own `:`.
+    private MolangExpr grouped() {
+        var outerThenBranch = inThenBranch;
+        inThenBranch = false;
+        var expr = expr(0);
+        inThenBranch = outerThenBranch;
+        return expr;
+    }
+
     /**
      * Parses a possible left side expression.
      */
@@ -147,12 +166,15 @@ public final class MolangParser {
                 yield new MolangExpr.Unary(MolangExpr.Unary.Op.NOT, rhs);
             }
             case LPAREN -> {
-                var expr = expr(0);
+                var expr = grouped();
                 lexer.expect(MolangLexer.Tok.RPAREN);
                 yield expr;
             }
             case LBRACE -> {
+                var outerThenBranch = inThenBranch;
+                inThenBranch = false;
                 var statements = statements();
+                inThenBranch = outerThenBranch;
                 lexer.expect(MolangLexer.Tok.RBRACK);
                 yield new MolangExpr.Block(statements);
             }
@@ -186,6 +208,9 @@ public final class MolangParser {
         };
     }
 
+    // Conditional branches stop before `??` but may contain assignments and further conditionals.
+    private static final int CONDITIONAL_BRANCH_BINDING_POWER = 2;
+
     private enum Operator {
         MEMBER_ACCESS(35, 36, null), // TODO
 
@@ -210,7 +235,8 @@ public final class MolangParser {
 
         TERNARY(0, 0, null), // Open of a ternary expression (?), only a postfix operator
 
-        NULL_COALESCE(5, 6, MolangExpr.Binary.Op.NULL_COALESCE),
+        // Binds looser than conditionals, as in molangjs: `a ?? b ? c : d` is `a ?? (b ? c : d)`
+        NULL_COALESCE(1, 2, MolangExpr.Binary.Op.NULL_COALESCE),
 
         ASSIGN(2, 0, null), // Right side is the rest of the expression, eg `v.x = a ? b : c`
 
@@ -241,7 +267,7 @@ public final class MolangParser {
 
         public int postfixBindingPower() {
             return switch (this) {
-                case TERNARY -> 1;
+                case TERNARY -> 3;
                 case LPAREN -> 34;
                 default -> -1;
             };
