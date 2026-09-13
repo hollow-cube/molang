@@ -46,7 +46,15 @@ public class TestMolangMath {
             Arguments.of("math.lerprotate(0, 181, 0.5)", 270.5),
             Arguments.of("math.sign(0)", 0),
                 Arguments.of("math.sign(2.5)", 1),
-                Arguments.of("math.sign(-0.5)", -1)
+                Arguments.of("math.sign(-0.5)", -1),
+
+                Arguments.of("math.ease_in_out_back(2, 10, 0)", 2),
+                Arguments.of("math.ease_in_out_back(2, 10, 0.1)", 1.699851584),
+                Arguments.of("math.ease_in_out_back(2, 10, 0.25)", 1.20254525),
+                Arguments.of("math.ease_in_out_back(2, 10, 0.5)", 6),
+                Arguments.of("math.ease_in_out_back(2, 10, 0.75)", 10.79745475),
+                Arguments.of("math.ease_in_out_back(2, 10, 0.9)", 10.300148415999999),
+                Arguments.of("math.ease_in_out_back(2, 10, 1)", 10)
         );
     }
 

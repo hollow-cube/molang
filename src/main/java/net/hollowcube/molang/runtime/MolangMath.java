@@ -1,7 +1,6 @@
 package net.hollowcube.molang.runtime;
 
 import net.hollowcube.molang.eval.MolangValue;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Set;
@@ -124,7 +123,7 @@ public final class MolangMath {
     }
 
     /// Output goes from start to end via zeroToOne, overshooting at both start and end, with smoother change in the middle
-    public static double easeInBackOut(double start, double end, double zeroToOne) {
+    public static double easeInOutBack(double start, double end, double zeroToOne) {
         double f = EasingFunction.easeInOutBack.apply(zeroToOne);
         return start + (end - start) * f;
     }
@@ -466,9 +465,9 @@ public final class MolangMath {
             double[] args = checkArgs("ease_in_expo", rawArgs, 3);
             return new MolangValue.Num(easeInExpo(args[0], args[1], args[2]));
         };
-        private static final MolangValue.Function EASE_IN_BACK_OUT = (rawArgs) -> {
-            double[] args = checkArgs("ease_in_back_out", rawArgs, 3);
-            return new MolangValue.Num(easeInBackOut(args[0], args[1], args[2]));
+        private static final MolangValue.Function EASE_IN_OUT_BACK = (rawArgs) -> {
+            double[] args = checkArgs("ease_in_out_back", rawArgs, 3);
+            return new MolangValue.Num(easeInOutBack(args[0], args[1], args[2]));
         };
         private static final MolangValue.Function EASE_IN_OUT_BOUNCE = (rawArgs) -> {
             double[] args = checkArgs("ease_in_out_bounce", rawArgs, 3);
@@ -644,7 +643,7 @@ public final class MolangMath {
         };
 
         @Override
-        public @NotNull MolangValue get(@NotNull String field) {
+        public MolangValue get(String field) {
             return switch (field) {
                 case "abs" -> ABS;
                 case "acos" -> ACOS;
@@ -663,7 +662,7 @@ public final class MolangMath {
                 case "ease_in_cubic" -> EASE_IN_CUBIC;
                 case "ease_in_elastic" -> EASE_IN_ELASTIC;
                 case "ease_in_expo" -> EASE_IN_EXPO;
-                case "ease_in_back_out" -> EASE_IN_BACK_OUT;
+                case "ease_in_out_back" -> EASE_IN_OUT_BACK;
                 case "ease_in_out_bounce" -> EASE_IN_OUT_BOUNCE;
                 case "ease_in_out_circ" -> EASE_IN_OUT_CIRC;
                 case "ease_in_out_cubic" -> EASE_IN_OUT_CUBIC;
@@ -710,9 +709,10 @@ public final class MolangMath {
             };
         }
 
-        private static double[] checkArgs(@NotNull String name, @NotNull List<MolangValue> args, int expected) {
+        private static double[] checkArgs(String name, List<MolangValue> args, int expected) {
             if (args.size() != expected)
-                throw new MolangContentException("Expected %d arguments got %d for %s".formatted(expected, args.size(), name));
+                throw new MolangContentException(
+                        "Expected %d arguments got %d for %s".formatted(expected, args.size(), name));
             double[] result = new double[expected];
             for (int i = 0; i < expected; i++) {
                 // TODO: this needs to generate a content error...
