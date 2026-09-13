@@ -9,9 +9,6 @@ import java.util.Objects;
 
 public final class MolangParser {
     private final MolangLexer lexer;
-    // Whether we are in the then branch of a conditional, where (as in molangjs) the next `:` belongs
-    // to the outer conditional, so a nested `a ? b` cannot take an else branch unless it is grouped.
-    private boolean inThenBranch = false;
 
     public MolangParser(String source) {
         this(source, false);
@@ -67,13 +64,10 @@ public final class MolangParser {
 
                 lhs = switch (op) {
                     case TERNARY -> {
-                        var outerThenBranch = inThenBranch;
-                        inThenBranch = true;
+                        // As in C, a `:` belongs to the nearest `?` without one, so `a ? b ? c : d`
+                        // is `a ? (b ? c : d)`. A binary conditional `a ? b` is `a ? b : 0`.
                         var trueExpr = expr(CONDITIONAL_BRANCH_BINDING_POWER);
-                        inThenBranch = outerThenBranch;
-
-                        // Binary conditional `a ? b` is `a ? b : 0`
-                        if (inThenBranch || lexer.peek() != MolangLexer.Tok.COLON)
+                        if (lexer.peek() != MolangLexer.Tok.COLON)
                             yield new MolangExpr.Ternary(lhs, trueExpr, new MolangExpr.Num(0));
                         lexer.next(); // Colon
                         var falseExpr = expr(CONDITIONAL_BRANCH_BINDING_POWER);
@@ -86,7 +80,7 @@ public final class MolangParser {
 
                         if (next != null && next != MolangLexer.Tok.RPAREN) {
                             do {
-                                args.add(grouped());
+                                args.add(expr(0));
                                 next = lexer.peek();
                             } while (next == MolangLexer.Tok.COMMA && lexer.next() != null);
 
@@ -129,15 +123,6 @@ public final class MolangParser {
         return lhs;
     }
 
-    /// Parses an expression inside brackets or an argument list, where a conditional may take its own `:`.
-    private MolangExpr grouped() {
-        var outerThenBranch = inThenBranch;
-        inThenBranch = false;
-        var expr = expr(0);
-        inThenBranch = outerThenBranch;
-        return expr;
-    }
-
     /**
      * Parses a possible left side expression.
      */
@@ -168,15 +153,12 @@ public final class MolangParser {
                 yield new MolangExpr.Unary(MolangExpr.Unary.Op.NOT, rhs);
             }
             case LPAREN -> {
-                var expr = grouped();
+                var expr = expr(0);
                 lexer.expect(MolangLexer.Tok.RPAREN);
                 yield expr;
             }
             case LBRACE -> {
-                var outerThenBranch = inThenBranch;
-                inThenBranch = false;
                 var statements = statements();
-                inThenBranch = outerThenBranch;
                 lexer.expect(MolangLexer.Tok.RBRACK);
                 yield new MolangExpr.Block(statements);
             }

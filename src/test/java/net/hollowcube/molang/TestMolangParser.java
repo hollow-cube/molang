@@ -64,10 +64,11 @@ public class TestMolangParser {
             ),
             Arguments.of("binary conditional", "a ? b", "(? a b 0.0)"),
             Arguments.of("binary conditional takes the rest", "a ? b + c", "(? a (+ b c) 0.0)"),
+            Arguments.of("conditional in then branch", "a ? b ? c : d", "(? a (? b c d) 0.0)"),
             Arguments.of(
-                "binary conditional in then branch",
-                "a ? b ? c : d",
-                "(? a (? b c 0.0) d)"
+                "conditionals in both branches",
+                "a ? b ? c : d : e ? f : g",
+                "(? a (? b c d) (? e f g))"
             ),
             Arguments.of(
                 "grouped conditional in then branch",

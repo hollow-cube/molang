@@ -78,8 +78,10 @@ public class TestMolangEvaluator {
             Arguments.of("0 ? 5", 0),
             Arguments.of("1 ? 2 + 3", 5),
             Arguments.of("0 + 1 ? 4", 4),
-            Arguments.of("1 ? 0 ? 3 : 4", 0),
-            Arguments.of("0 ? 1 ? 3 : 4", 4),
+            // The C rule the Bedrock docs specify, where molangjs pairs the : with the outer ? (giving 0 and 4)
+            Arguments.of("1 ? 0 ? 3 : 4", 4),
+            Arguments.of("0 ? 1 ? 3 : 4", 0),
+            Arguments.of("1 ? 0 ? 3 : 4 : 5", 4),
             Arguments.of("1 ? (0 ? 3 : 4)", 4),
             Arguments.of("1 ? math.max(0 ? 3 : 4, 1)", 4),
             Arguments.of("1 ? {0 ? 3 : 4}", 4),
