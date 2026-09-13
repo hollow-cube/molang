@@ -1,12 +1,15 @@
 package net.hollowcube.molang;
 
+import net.hollowcube.molang.eval.MolangEvaluator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 public class TestMolangOptimizer {
 
@@ -18,6 +21,16 @@ public class TestMolangOptimizer {
         var actual = MolangPrinter.print(optimized);
 
         assertEquals(expected, actual);
+    }
+
+    @MethodSource("net.hollowcube.molang.runtime.TestMolangMath#cases")
+    @ParameterizedTest(name = "{0}")
+    public void testFoldedMathMatchesEvaluation(String input, double ignored) {
+        var expr = new MolangParser(input).parse();
+        var optimized = MolangOptimizer.optimizeAst(expr);
+
+        var folded = assertInstanceOf(MolangExpr.Num.class, optimized);
+        assertEquals(new MolangEvaluator(Map.of()).eval(expr), folded.value());
     }
 
     private static Stream<Arguments> inputPairs() {
