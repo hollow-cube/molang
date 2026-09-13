@@ -45,6 +45,8 @@ public class TestMolangOptimizer {
                         "math.lerp(0, 10, 0.5)", "5.0"),
                 Arguments.of("invalid math func",
                         "math.lerp(0, 10)", "(? (. math lerp) 0.0 10.0)"),
+                Arguments.of("division by zero",
+                        "1 / (2 - 2)", "(/ 1.0 0.0)"),
                 Arguments.of("invalid query func",
                         "q.anim_time + 5", "(+ (. q anim_time) 5.0)")
         );

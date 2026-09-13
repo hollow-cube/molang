@@ -28,14 +28,15 @@ public final class MolangOptimizer {
             case MolangExpr.Binary binary -> {
                 final MolangExpr lhs = optimizeAst(binary.lhs());
                 final MolangExpr rhs = optimizeAst(binary.rhs());
+                // Division by zero is left to the evaluator, which reports it as a content error.
                 if (lhs instanceof MolangExpr.Num(double leftValue) && rhs instanceof MolangExpr.Num(
                         double rightValue
-                )) {
+                ) && !(binary.op() == MolangExpr.Binary.Op.DIV && rightValue == 0)) {
                     yield new MolangExpr.Num(switch (binary.op()) {
                         case PLUS -> leftValue + rightValue;
                         case MINUS -> leftValue - rightValue;
                         case MUL -> leftValue * rightValue;
-                        case DIV -> rightValue != 0 ? leftValue / rightValue : Double.NaN; // Avoid division by zero
+                        case DIV -> leftValue / rightValue;
                         case NULL_COALESCE -> leftValue != 0 ? leftValue : rightValue;
                         case GTE -> leftValue >= rightValue ? 1.0 : 0.0;
                         case GT -> leftValue > rightValue ? 1.0 : 0.0;
