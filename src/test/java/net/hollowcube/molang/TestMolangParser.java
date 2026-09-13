@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TestMolangParser {
 
@@ -45,6 +46,10 @@ public class TestMolangParser {
                         "1 + 2 ?? 1", "(?? (+ 1.0 2.0) 1.0)"), //todo is this correct? should it be (+ 1.0 (?? 2.0 1.0))?
                 Arguments.of("normalize case 1",
                         "q.is_alive()", "(. q is_alive)"),
+                Arguments.of("empty call operand",
+                        "q.is_alive() + 1", "(+ (. q is_alive) 1.0)"),
+                Arguments.of("trailing whitespace",
+                        "1 + 2 \n", "(+ 1.0 2.0)"),
                 Arguments.of("normalize case 2",
                         "q.is_alive", "(. q is_alive)"),
                 Arguments.of("single ternary simple",
@@ -60,5 +65,15 @@ public class TestMolangParser {
                 Arguments.of("lt eq precedence 2",
                         "1 == 2 < 3", "(== 1.0 (< 2.0 3.0))")
         );
+    }
+
+    @MethodSource("invalidInputs")
+    @ParameterizedTest(name = "{0}")
+    public void testInvalidInputs(String input) {
+        assertThrows(IllegalStateException.class, () -> new MolangParser(input).parse());
+    }
+
+    private static Stream<String> invalidInputs() {
+        return Stream.of("1 2", "a.b c", "(1))", "1 ? 2 : 3 4", "{1;} 2", "q.is_alive() 1", "f(");
     }
 }

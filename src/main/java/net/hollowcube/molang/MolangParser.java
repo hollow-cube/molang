@@ -19,7 +19,11 @@ public final class MolangParser {
     }
 
     public MolangExpr parse() {
-        return expr(0);
+        var expr = expr(0);
+        var trailing = lexer.next();
+        if (trailing != null)
+            throw new IllegalStateException("unexpected token " + trailing + " after expression");
+        return expr;
     }
 
     private MolangExpr expr(int minBindingPower) {
@@ -55,6 +59,7 @@ public final class MolangParser {
                             lexer.expect(MolangLexer.Tok.RPAREN);
                             yield new MolangExpr.Call(lhs, args);
                         }
+                        lexer.expect(MolangLexer.Tok.RPAREN);
                         yield lhs;
                     }
                     default -> throw new IllegalStateException("Unexpected value: " + op);
