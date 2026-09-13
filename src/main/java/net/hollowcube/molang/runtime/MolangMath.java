@@ -360,11 +360,15 @@ public final class MolangMath {
         return result;
     }
 
-    /// Random value between low (inclusive) and high (exclusive)
-    ///
-    /// Note: The original molang spec says that the range is inclusive, but this high end is exclusive.
+    /// Random value between low and high inclusive. The bounds may be given in either order.
     public static double random(double low, double high) {
-        return ThreadLocalRandom.current().nextDouble(low, high);
+        if (low > high) {
+            double swap = low;
+            low = high;
+            high = swap;
+        }
+        if (low == high) return low;
+        return ThreadLocalRandom.current().nextDouble(low, Math.nextUp(high));
     }
 
     /// Random integer value between low and high (inclusive)
