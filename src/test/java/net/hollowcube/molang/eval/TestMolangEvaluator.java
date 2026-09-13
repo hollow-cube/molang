@@ -37,7 +37,9 @@ public class TestMolangEvaluator {
                 Arguments.of("math.asin(2) + 1", 1),
                 Arguments.of("math.max(math.asin(2), 5)", 5),
                 Arguments.of("math.max(math.mod(5, 0), -5)", 0),
-                Arguments.of("math.asin(2) ?? 5", 0)
+                Arguments.of("math.asin(2) ?? 5", 0),
+                Arguments.of("math.max(v.unset, 5)", 5),
+                Arguments.of("math.abs(v.unset) + 1", 1)
         );
     }
 

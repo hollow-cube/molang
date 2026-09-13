@@ -207,6 +207,7 @@ public final class MolangEvaluator {
             if (value instanceof MolangValue.Nil) {
                 errors.add(new ContentError("Cannot pass 'nil' as an argument to a function: " + call));
                 args.add(new MolangValue.Num(0.0)); // Replace nil with 0.0
+                continue;
             }
             args.add(value);
         }
