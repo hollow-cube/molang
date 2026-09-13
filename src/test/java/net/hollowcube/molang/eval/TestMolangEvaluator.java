@@ -127,6 +127,27 @@ public class TestMolangEvaluator {
     }
 
     @Test
+    public void testStrings() {
+        MolangValue.Function isNamed = args -> new MolangValue.Num(
+            args.size() == 1
+                && args.getFirst() instanceof MolangValue.Str(var name)
+                && name.equals("Bob")
+        );
+        var evaluator = new MolangEvaluator(
+            Map.of("q", MolangValue.Holder.holder(Map.of("is_named", isNamed)))
+        );
+
+        assertEquals(1, eval(evaluator, "'Pig' == 'Pig'"));
+        assertEquals(0, eval(evaluator, "'Pig' == 'pig'"));
+        assertEquals(1, eval(evaluator, "'Pig' != 'pig'"));
+        assertEquals(1, eval(evaluator, "'' == ''"));
+        assertEquals(1, eval(evaluator, "q.is_named('Bob')"));
+        assertEquals(0, eval(evaluator, "q.is_named('bob')"));
+        assertEquals(1, eval(evaluator, "v.name = 'Moo'; v.name == 'Moo'"));
+        assertEquals(new MolangValue.Str("Moo"), evaluator.getVariable("name"));
+    }
+
+    @Test
     public void testHostNamesAreCaseInsensitive() {
         var query = MolangValue.Holder.holder(
             Map.of("Anim_Time", new MolangValue.Num(0.3), "isAlive", new MolangValue.Num(1))
@@ -195,6 +216,9 @@ public class TestMolangEvaluator {
             Arguments.of(";", 0),
             Arguments.of(" \n ;; \t", 0),
             Arguments.of("{}", 0),
+            Arguments.of("'text' + 1", 1),
+            Arguments.of("'text'", 0),
+            Arguments.of("'text' == 1", 0),
             Arguments.of("math.asin(2)", 0),
             Arguments.of("math.asin(2) + 1", 1),
             Arguments.of("math.max(math.asin(2), 5)", 5),

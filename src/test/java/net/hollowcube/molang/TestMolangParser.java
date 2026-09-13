@@ -62,6 +62,18 @@ public class TestMolangParser {
                 "v.x = 1; return v.x",
                 "{ (= (. v x) 1.0); (return (. v x)) }"
             ),
+            Arguments.of(
+                "string keeps case",
+                "V.Name == 'Minecraft:Pig'",
+                "(== (. v name) 'Minecraft:Pig')"
+            ),
+            Arguments.of("empty string", "''", "''"),
+            Arguments.of("string with spaces", "' a b '", "' a b '"),
+            Arguments.of(
+                "string argument",
+                "q.is_item_equipped('Main_Hand')",
+                "(? (. q is_item_equipped) 'Main_Hand')"
+            ),
             Arguments.of("empty script", "", "{ }"),
             Arguments.of("whitespace and semicolon script", " \n ;; \t", "{ }"),
             Arguments.of("binary conditional", "a ? b", "(? a b 0.0)"),
@@ -130,6 +142,9 @@ public class TestMolangParser {
             "v.x = = 1",
             "1; 2 3",
             "{1; 2",
+            "'abc",
+            "'a'b'",
+            "'it''s'",
             "1 }"
         );
     }

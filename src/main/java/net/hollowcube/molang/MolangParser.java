@@ -132,6 +132,11 @@ public final class MolangParser {
 
         return switch (token) {
             case NUMBER -> new MolangExpr.Num(Double.parseDouble(lexer.span()));
+            case STRING -> {
+                // Strings keep their case, unlike names
+                var span = lexer.span();
+                yield new MolangExpr.Str(span.substring(1, span.length() - 1));
+            }
             case IDENT -> {
                 // Names are case-insensitive, so they are normalized to lowercase
                 var name = MolangValue.Holder.normalizeName(lexer.span());

@@ -49,7 +49,9 @@ public class TestMolangLexer {
             Arguments.of("aBc", MolangLexer.Tok.IDENT),
             Arguments.of("aBc1", MolangLexer.Tok.IDENT),
             Arguments.of(" + ", MolangLexer.Tok.PLUS),
-            Arguments.of("123 \t\r\n", MolangLexer.Tok.NUMBER)
+            Arguments.of("123 \t\r\n", MolangLexer.Tok.NUMBER),
+            Arguments.of("'Hello World!'", MolangLexer.Tok.STRING),
+            Arguments.of("''", MolangLexer.Tok.STRING)
         );
     }
 }

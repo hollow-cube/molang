@@ -29,6 +29,7 @@ final class MolangLexer {
         BARBAR,
         BANG,
         NUMBER,
+        STRING,
         IDENT,
     }
 
@@ -55,6 +56,7 @@ final class MolangLexer {
         char c = advance();
         if (isAlpha(c)) return ident();
         if (isDigit(c)) return number();
+        if (c == '\'') return string();
 
         return symbol(c);
     }
@@ -97,6 +99,14 @@ final class MolangLexer {
         }
 
         return Tok.IDENT;
+    }
+
+    /// A single quoted string. Molang has no escapes, so a string cannot contain `'`.
+    private Tok string() {
+        while (!atEnd() && peek0() != '\'') advance();
+        if (atEnd()) throw new IllegalStateException("unterminated string starting at " + start);
+        advance(); // Closing quote
+        return Tok.STRING;
     }
 
     private Tok number() {

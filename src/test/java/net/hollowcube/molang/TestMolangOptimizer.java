@@ -48,6 +48,9 @@ public class TestMolangOptimizer {
                 "v.x = 2 * 3; return v.x",
                 "{ (= (. v x) 6.0); (return (. v x)) }"
             ),
+            Arguments.of("string equality", "'Pig' == 'Pig'", "1.0"),
+            Arguments.of("string equality keeps case", "'Pig' == 'pig'", "0.0"),
+            Arguments.of("string in arithmetic", "'a' + 1", "(+ 'a' 1.0)"),
             Arguments.of("invalid query func", "q.anim_time + 5", "(+ (. q anim_time) 5.0)")
         );
     }
