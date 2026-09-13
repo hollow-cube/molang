@@ -294,13 +294,23 @@ public final class MolangMath {
     }
 
     /// Lerp the shortest direction around a circle from start degrees to end degrees via zeroToOne
+    ///
+    /// Matches Blockbench (molangjs): both angles are wrapped into [0, 360) and the lerp runs from
+    /// whichever of the two is smaller, so the result is in [0, 360) and zeroToOne is not clamped.
     public static double lerprotate(double start, double end, double zeroToOne) {
-        //todo test me
-        zeroToOne = clamp(zeroToOne, 0, 1);
-        double diff = end - start;
-        if (diff > 180) diff -= 360;
-        else if (diff < -180) diff += 360;
-        return start + diff * zeroToOne;
+        double a = wrapDegrees(start), b = wrapDegrees(end);
+        if (a > b) {
+            double swap = a;
+            a = b;
+            b = swap;
+        }
+        double diff = b - a;
+        if (diff > 180) return wrapDegrees(b + zeroToOne * (360 - diff));
+        return a + zeroToOne * diff;
+    }
+
+    private static double wrapDegrees(double value) {
+        return (((value + 180) % 360) + 180) % 360;
     }
 
     /// Natural logarithm of value
