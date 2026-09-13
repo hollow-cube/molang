@@ -1,6 +1,7 @@
 package net.hollowcube.molang.eval;
 
 import net.hollowcube.molang.MolangParser;
+import net.hollowcube.molang.runtime.MolangMath;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TestMolangEvaluator {
 
@@ -86,6 +88,11 @@ public class TestMolangEvaluator {
             Arguments.of("0 ?? 2 ? 3 : 4", 0),
             Arguments.of("1 ? 2 : 3 ?? 9", 2),
             Arguments.of("v.z = 1 ? 2; v.z", 2),
+            Arguments.of("Math.Lerp(0, 10, 0.5)", 5),
+            Arguments.of("Q.Anim_Time * 10", 3),
+            Arguments.of("V.Foo = 3; v.foo", 3),
+            Arguments.of("Return 4; 5", 4),
+            Arguments.of("v.i = 0; Loop(2, {V.I = V.I + 1;}); v.i", 2),
             Arguments.of("return 7; 8", 7),
             Arguments.of("return;", 0),
             Arguments.of("v.a = 1; return v.a + 1; v.a = 9", 2),
@@ -114,6 +121,53 @@ public class TestMolangEvaluator {
         var evaluator = new MolangEvaluator(Map.of());
         assertEquals(2, eval(evaluator, "v.a = 1; return v.a + 1; v.a = 9"));
         assertEquals(1, eval(evaluator, "v.a"));
+    }
+
+    @Test
+    public void testHostNamesAreCaseInsensitive() {
+        var query = MolangValue.Holder.holder(
+            Map.of("Anim_Time", new MolangValue.Num(0.3), "isAlive", new MolangValue.Num(1))
+        );
+        var evaluator = new MolangEvaluator(Map.of("Q", query, "Query", query));
+
+        assertEquals(0.3, eval(evaluator, "q.anim_time"));
+        assertEquals(0.3, eval(evaluator, "Query.ANIM_TIME"));
+        assertEquals(1, eval(evaluator, "q.isAlive"));
+        assertEquals(1, eval(evaluator, "query.isalive"));
+        assertEquals(new MolangValue.Num(0.3), query.get("ANIM_time"));
+        assertEquals(
+            new MolangValue.Num(5),
+            MolangMath.MODULE.get("Lerp") instanceof MolangValue.Function lerp
+                ? lerp.apply(
+                    List.of(
+                        new MolangValue.Num(0),
+                        new MolangValue.Num(10),
+                        new MolangValue.Num(0.5)
+                    )
+                )
+                : MolangValue.NIL
+        );
+    }
+
+    @Test
+    public void testVariablesAreCaseInsensitive() {
+        var evaluator = new MolangEvaluator(Map.of());
+        eval(evaluator, "V.Foo = 3");
+        assertEquals(new MolangValue.Num(3), evaluator.getVariable("FOO"));
+        assertEquals(new MolangValue.Num(3), evaluator.getVariable("foo"));
+    }
+
+    @Test
+    public void testNamesDifferingOnlyByCaseAreRejected() {
+        var one = new MolangValue.Num(1);
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> MolangValue.Holder.holder(Map.of("a", one, "A", one))
+        );
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> new MolangEvaluator(Map.of("q", one, "Q", one))
+        );
     }
 
     private static double eval(MolangEvaluator evaluator, String input) {

@@ -27,14 +27,14 @@ public final class MolangEvaluator {
     private final MolangValue.Holder root;
 
     public MolangEvaluator(Map<String, MolangValue> initial) {
-        var entries = new HashMap<>(initial);
+        var entries = new HashMap<>(MolangValue.Holder.normalizeNames(initial));
         entries.putIfAbsent("variable", variable);
         entries.putIfAbsent("v", variable);
         entries.putIfAbsent("temp", temp);
         entries.putIfAbsent("t", temp);
         entries.putIfAbsent("math", MolangMath.MODULE);
         entries.putIfAbsent("m", MolangMath.MODULE);
-        this.root = new HolderImpl(Map.copyOf(entries));
+        this.root = new HolderImpl(entries);
     }
 
     public double eval(MolangExpr expr) {
@@ -352,10 +352,15 @@ public final class MolangEvaluator {
 
     // Other builtins
 
+    /// Entries must already be keyed by normalized name.
     record HolderImpl(Map<String, MolangValue> entries) implements MolangValue.Holder {
+        HolderImpl {
+            entries = Map.copyOf(entries);
+        }
+
         @Override
         public MolangValue get(String field) {
-            return entries.getOrDefault(field, MolangValue.NIL);
+            return entries.getOrDefault(MolangValue.Holder.normalizeName(field), MolangValue.NIL);
         }
     }
 
@@ -364,12 +369,12 @@ public final class MolangEvaluator {
 
         @Override
         public void set(String field, MolangValue value) {
-            state.put(field, value);
+            state.put(MolangValue.Holder.normalizeName(field), value);
         }
 
         @Override
         public MolangValue get(String field) {
-            return state.getOrDefault(field, MolangValue.NIL);
+            return state.getOrDefault(MolangValue.Holder.normalizeName(field), MolangValue.NIL);
         }
 
         public void clear() {

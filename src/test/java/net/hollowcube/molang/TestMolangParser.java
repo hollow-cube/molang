@@ -87,6 +87,12 @@ public class TestMolangParser {
                 "(?? (? a b 0.0) c)"
             ),
             Arguments.of("binary conditional assignment", "v.z = a ? b", "(= (. v z) (? a b 0.0))"),
+            Arguments.of(
+                "case-insensitive names",
+                "Math.Lerp(V.Foo, 1, 2)",
+                "(? (. math lerp) (. v foo) 1.0 2.0)"
+            ),
+            Arguments.of("case-insensitive return", "RETURN 1", "(return 1.0)"),
             Arguments.of("normalize case 1", "q.is_alive()", "(. q is_alive)"),
             Arguments.of("empty call operand", "q.is_alive() + 1", "(+ (. q is_alive) 1.0)"),
             Arguments.of("trailing whitespace", "1 + 2 \n", "(+ 1.0 2.0)"),

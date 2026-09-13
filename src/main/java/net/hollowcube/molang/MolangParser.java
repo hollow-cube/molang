@@ -1,5 +1,6 @@
 package net.hollowcube.molang;
 
+import net.hollowcube.molang.eval.MolangValue;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -147,7 +148,8 @@ public final class MolangParser {
         return switch (token) {
             case NUMBER -> new MolangExpr.Num(Double.parseDouble(lexer.span()));
             case IDENT -> {
-                var name = lexer.span();
+                // Names are case-insensitive, so they are normalized to lowercase
+                var name = MolangValue.Holder.normalizeName(lexer.span());
                 if (!name.equals("return")) yield new MolangExpr.Ident(name);
                 // A bare `return` yields 0
                 var next = lexer.peek();

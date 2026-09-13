@@ -661,7 +661,7 @@ public final class MolangMath {
 
         @Override
         public MolangValue get(String field) {
-            return switch (field) {
+            return switch (MolangValue.Holder.normalizeName(field)) {
                 case "abs" -> ABS;
                 case "acos" -> ACOS;
                 case "asin" -> ASIN;
