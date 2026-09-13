@@ -26,7 +26,7 @@ public final class MolangParser {
         if (trailing != null)
             throw new IllegalStateException("unexpected token " + trailing + " after expression");
         return switch (statements.size()) {
-            case 0 -> throw new IllegalStateException("unexpected end of input");
+            case 0 -> new MolangExpr.Block(List.of()); // Evaluates with a content error
             case 1 -> statements.getFirst();
             default -> new MolangExpr.Block(statements);
         };

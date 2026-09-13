@@ -74,6 +74,7 @@ public class TestMolangEvaluator {
             Arguments.of("1;2;", 2),
             Arguments.of("v.i = 0; loop(3, {v.i = v.i + 1;}); v.i", 3),
             Arguments.of("{v.q = 4; v.q + 1}", 5),
+            Arguments.of("loop(2, {}); 1", 1),
             Arguments.of("1 ? 5", 5),
             Arguments.of("0 ? 5", 0),
             Arguments.of("1 ? 2 + 3", 5),
@@ -179,7 +180,7 @@ public class TestMolangEvaluator {
     }
 
     @MethodSource("contentErrors")
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "[{0}]")
     public void testContentErrorEvaluatesToZero(String input, double expected) {
         var evaluator = new MolangEvaluator(Map.of());
         var actual = evaluator.eval(new MolangParser(input).parse());
@@ -190,6 +191,10 @@ public class TestMolangEvaluator {
 
     private static Stream<Arguments> contentErrors() {
         return Stream.of(
+            Arguments.of("", 0),
+            Arguments.of(";", 0),
+            Arguments.of(" \n ;; \t", 0),
+            Arguments.of("{}", 0),
             Arguments.of("math.asin(2)", 0),
             Arguments.of("math.asin(2) + 1", 1),
             Arguments.of("math.max(math.asin(2), 5)", 5),

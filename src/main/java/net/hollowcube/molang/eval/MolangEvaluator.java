@@ -41,6 +41,10 @@ public final class MolangEvaluator {
         loopCounter = MAX_LOOP_COUNTER;
         errors.clear();
         temp.clear();
+        if (expr instanceof MolangExpr.Block(var exprs) && exprs.isEmpty()) {
+            errors.add(new ContentError("Empty expression"));
+            return 0.0;
+        }
         final MolangValue value = Return.catching(() -> evalExpr(expr));
         return unwrapNumber(
             value,

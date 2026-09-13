@@ -62,6 +62,8 @@ public class TestMolangParser {
                 "v.x = 1; return v.x",
                 "{ (= (. v x) 1.0); (return (. v x)) }"
             ),
+            Arguments.of("empty script", "", "{ }"),
+            Arguments.of("whitespace and semicolon script", " \n ;; \t", "{ }"),
             Arguments.of("binary conditional", "a ? b", "(? a b 0.0)"),
             Arguments.of("binary conditional takes the rest", "a ? b + c", "(? a (+ b c) 0.0)"),
             Arguments.of("conditional in then branch", "a ? b ? c : d", "(? a (? b c d) 0.0)"),
@@ -126,8 +128,6 @@ public class TestMolangParser {
             "1 + v.x = 2",
             "v.x =",
             "v.x = = 1",
-            "",
-            ";",
             "1; 2 3",
             "{1; 2",
             "1 }"
