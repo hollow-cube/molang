@@ -111,8 +111,8 @@ A namespace can hold:
 `variables` binds read-only host values under `variable` (`v`), eg an entity's position as `v.x`; other variables stay
 the state's own unless that namespace has a `dynamic` fallback. `query` (`q`) and `context` (`c`) have builder methods,
 `namespace` registers any other top level name, and `global` registers names at the top level, eg a function called as
-`name()`. Names are case-insensitive. `math`, `variable` and `temp` (and `m`, `v` and `t`) are built in and cannot be 
-registered.
+`name()`. Names are case-insensitive. `math`, `variable` and `temp` (and `m`, `v` and `t`) are built in, and `return`,
+`loop`, `for_each`, `break`, `continue` and `this` are keywords, so none of them can be registered at the top level.
 
 Host functions report problems by throwing `MolangContentException`, which becomes a content error that evaluates to 0; any
 other exception is also reported as a content error.

@@ -166,6 +166,27 @@ public class TestMolangEnvironment {
             IllegalArgumentException.class,
             () -> MolangEnvironment.builder().query(q -> q.constant("not-a-name", 1))
         );
+        for (String keyword : List.of("loop", "This", "break", "continue", "for_each", "return"))
+            assertThrows(
+                IllegalArgumentException.class,
+                () -> MolangEnvironment.builder().global(g -> g.constant(keyword, 1)),
+                keyword
+            );
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> MolangEnvironment.builder().namespace("loop", ns -> {})
+        );
+        // Keywords are only reserved at the top level
+        assertEquals(
+            1,
+            MolangEnvironment.builder()
+                .query(q -> q.constant("loop", 1))
+                .build()
+                .compile("q.loop")
+                .analysis()
+                .constant()
+                .orElseThrow()
+        );
 
         // Registering a namespace again adds to it, including through its alias
         var environment = MolangEnvironment.builder()

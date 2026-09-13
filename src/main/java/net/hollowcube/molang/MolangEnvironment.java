@@ -36,7 +36,8 @@ import java.util.function.ToDoubleFunction;
 /// ```
 ///
 /// Names are case-insensitive. `math`, `variable` and `temp` (and their aliases `m`, `v` and `t`)
-/// are provided by every environment and cannot be registered.
+/// are provided by every environment, and `return`, `loop`, `for_each`, `break`, `continue` and
+/// `this` are keywords, so none of them can be registered at the top level.
 public final class MolangEnvironment<T> {
     public static final Set<String> RESERVED_NAMES = Set.of(
         "math",
@@ -44,7 +45,13 @@ public final class MolangEnvironment<T> {
         "variable",
         "v",
         "temp",
-        "t"
+        "t",
+        "return",
+        "loop",
+        "for_each",
+        "break",
+        "continue",
+        "this"
     );
 
     private static final MolangEnvironment<Object> EMPTY = new MolangEnvironment<>(Map.of(), null);
