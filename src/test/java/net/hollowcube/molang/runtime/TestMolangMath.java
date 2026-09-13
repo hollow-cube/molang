@@ -41,6 +41,21 @@ public class TestMolangMath {
         }
     }
 
+    @Test
+    public void testRandomIntegerEqualBounds() {
+        assertEquals(3, evalWithoutErrors("math.random_integer(3, 3)"));
+    }
+
+    @Test
+    public void testRandomIntegerBoundsInEitherOrder() {
+        var seen = new java.util.HashSet<Double>();
+        for (int i = 0; i < 300; i++) {
+            seen.add(evalWithoutErrors("math.random_integer(1, 3)"));
+            seen.add(evalWithoutErrors("math.random_integer(3, 1)"));
+        }
+        assertEquals(java.util.Set.of(1.0, 2.0, 3.0), seen);
+    }
+
     private static double evalWithoutErrors(String input) {
         var evaluator = new MolangEvaluator(Map.of());
         var actual = evaluator.eval(new MolangParser(input).parse());

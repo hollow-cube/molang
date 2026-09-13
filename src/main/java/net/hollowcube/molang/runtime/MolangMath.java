@@ -371,9 +371,11 @@ public final class MolangMath {
         return ThreadLocalRandom.current().nextDouble(low, Math.nextUp(high));
     }
 
-    /// Random integer value between low and high (inclusive)
+    /// Random integer value between low and high inclusive. The bounds may be given in either order.
     public static double randomInteger(double low, double high) {
-        return ThreadLocalRandom.current().nextInt((int) low, (int) high + 1);
+        long min = (long) Math.min(low, high), max = (long) Math.max(low, high);
+        if (min == max) return min;
+        return ThreadLocalRandom.current().nextLong(min, max + 1);
     }
 
     /// Round value to nearest integral number
