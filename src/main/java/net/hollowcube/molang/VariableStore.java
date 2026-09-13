@@ -58,6 +58,17 @@ final class VariableStore {
         refs[id] = value;
     }
 
+    /// An independent store holding the same values.
+    VariableStore copy() {
+        var copy = new VariableStore();
+        copy.owners = owners.clone();
+        copy.numbers = numbers.clone();
+        copy.refs = refs == null ? null : refs.clone();
+        copy.generations = generations.clone();
+        copy.generation = generation;
+        return copy;
+    }
+
     void clear() {
         if (++generation == 0) {
             Arrays.fill(generations, 0);

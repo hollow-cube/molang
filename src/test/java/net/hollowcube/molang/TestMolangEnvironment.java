@@ -271,6 +271,22 @@ public class TestMolangEnvironment {
     }
 
     @Test
+    public void testCopiedStateIsIndependent() {
+        var state = new MolangState();
+        MolangProgram.compile("v.a = 1; v.s = 'Pig'").eval(state);
+        var copy = state.copy();
+        assertEquals(new MolangValue.Num(1), copy.getVariable("a"));
+        assertEquals(state.getVariable("s"), copy.getVariable("s"));
+
+        MolangProgram.compile("v.a = 2; v.b = 3; v.s = 4").eval(copy);
+        assertEquals(new MolangValue.Num(1), state.getVariable("a"));
+        assertEquals(MolangValue.NULL, state.getVariable("b"));
+        assertEquals(new MolangValue.Num(4), copy.getVariable("s"));
+        MolangProgram.compile("v.c = 5").eval(state);
+        assertEquals(MolangValue.NULL, copy.getVariable("c"));
+    }
+
+    @Test
     public void testEvalBool() {
         var state = new MolangState();
         assertEquals(true, MolangProgram.compile("2 > 1").evalBool(state));

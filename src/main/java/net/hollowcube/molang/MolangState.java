@@ -14,11 +14,27 @@ public final class MolangState {
     boolean loopScope = false; // Whether we are currently in a looping scope (to catch break/continues)
     int loopCounter = MAX_LOOP_COUNTER;
 
-    final VariableStore variable = new VariableStore();
+    final VariableStore variable;
     final VariableStore temp = new VariableStore();
     /// The source of the program being evaluated, for content errors, or null if it is not known.
     @Nullable
     String source;
+
+    public MolangState() {
+        this.variable = new VariableStore();
+    }
+
+    private MolangState(MolangState other) {
+        this.variable = other.variable.copy();
+        this.errors.addAll(other.errors);
+        this.source = other.source;
+    }
+
+    /// An independent state starting with this one's variables and errors, eg to evaluate ahead
+    /// without disturbing this state. Changes to either do not affect the other.
+    public MolangState copy() {
+        return new MolangState(this);
+    }
 
     /// The value of `variable.name`, or null if it is unset.
     public MolangValue getVariable(String name) {
