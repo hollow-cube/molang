@@ -373,9 +373,11 @@ public final class MolangMath {
         return Math.round(value);
     }
 
-    /// Returns 1 if value is positive, -1 otherwise
+    /// Returns 1 if value is positive, -1 if it is negative, 0 if it is zero
+    ///
+    /// Note: sign(0) is 0 to match Blockbench (molangjs), where the Bedrock documentation says -1.
     public static double sign(double value) {
-        return value > 0 ? 1 : -1;
+        return Math.signum(value);
     }
 
     /// Sine (in degrees) of value
