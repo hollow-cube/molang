@@ -18,12 +18,35 @@ public final class MolangParser {
         //todo multiline support
     }
 
+    /// Parses a single expression, or a script of `;` separated statements as a [MolangExpr.Block].
     public MolangExpr parse() {
-        var expr = expr(0);
+        var statements = statements();
         var trailing = lexer.next();
         if (trailing != null)
             throw new IllegalStateException("unexpected token " + trailing + " after expression");
-        return expr;
+        return switch (statements.size()) {
+            case 0 -> throw new IllegalStateException("unexpected end of input");
+            case 1 -> statements.getFirst();
+            default -> new MolangExpr.Block(statements);
+        };
+    }
+
+    /// Parses `;` separated statements up to the end of input or a closing brace. Empty statements
+    /// (eg a trailing `;`) are skipped.
+    private List<MolangExpr> statements() {
+        List<MolangExpr> statements = new ArrayList<>();
+        while (true) {
+            var next = lexer.peek();
+            if (next == null || next == MolangLexer.Tok.RBRACK) break;
+            if (next == MolangLexer.Tok.SEMICOLON) {
+                lexer.next();
+                continue;
+            }
+
+            statements.add(expr(0));
+            if (lexer.peek() != MolangLexer.Tok.SEMICOLON) break;
+        }
+        return statements;
     }
 
     private MolangExpr expr(int minBindingPower) {
@@ -119,14 +142,9 @@ public final class MolangParser {
                 yield expr;
             }
             case LBRACE -> {
-                List<MolangExpr> exprs = new ArrayList<>();
-                MolangLexer.Tok next;
-                while ((next = lexer.peek()) != null && next != MolangLexer.Tok.RBRACK) {
-                    exprs.add(expr(0));
-                    lexer.expect(MolangLexer.Tok.SEMICOLON);
-                }
+                var statements = statements();
                 lexer.expect(MolangLexer.Tok.RBRACK);
-                yield new MolangExpr.Block(exprs);
+                yield new MolangExpr.Block(statements);
             }
             //todo better error handling
             default -> throw new IllegalStateException("unexpected token " + token);

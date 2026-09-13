@@ -219,9 +219,11 @@ public final class MolangEvaluator {
         return condition ? evalExpr(ternary.thenExpr()) : evalExpr(ternary.elseExpr());
     }
 
+    /// A block evaluates to its last statement, or 0 if it is empty (as molangjs).
     private MolangValue evalBlock(MolangExpr.Block block) {
-        for (var expr : block.exprs()) evalExpr(expr); // Eval and ignore the results
-        return MolangValue.NIL;
+        MolangValue result = new MolangValue.Num(0.0);
+        for (var expr : block.exprs()) result = evalExpr(expr);
+        return result;
     }
 
     private MolangValue evalCall(MolangExpr.Call call) {

@@ -52,6 +52,33 @@ public class TestMolangEvaluator {
         assertEquals(1, evaluator.getErrors().size(), () -> evaluator.getErrors().toString());
     }
 
+    @MethodSource("scripts")
+    @ParameterizedTest(name = "{0}")
+    public void testScripts(String input, double expected) {
+        var query = MolangValue.Holder.holder(
+            Map.of("anim_time", new MolangValue.Num(0.3), "life_time", new MolangValue.Num(0.7))
+        );
+        var evaluator = new MolangEvaluator(Map.of("q", query, "query", query));
+        assertEquals(expected, eval(evaluator, input), 1e-9);
+    }
+
+    // Expected values are the results of evaluating the same script with Blockbench's molangjs (1.7.0),
+    // with q.anim_time = 0.3 and q.life_time = 0.7.
+    private static Stream<Arguments> scripts() {
+        return Stream.of(
+            Arguments.of("v.a = 2; v.a * 5", 10),
+            Arguments.of("v.a = 2; v.b = 4;", 0),
+            Arguments.of("1; 2; 3", 3),
+            Arguments.of("1;2;", 2),
+            Arguments.of("v.i = 0; loop(3, {v.i = v.i + 1;}); v.i", 3),
+            Arguments.of("{v.q = 4; v.q + 1}", 5),
+            Arguments.of(
+                "v.freq = 2;\nv.mag = 45;\nv.balloon = 2;\nv.offset = 0;\nv.time_offset = 0;\n\nmath.atan(v.balloon * math.sin((q.anim_time + v.time_offset) * 180 * v.freq)) / math.atan(v.balloon) * v.mag + v.offset",
+                44.171966508167216
+            )
+        );
+    }
+
     private static double eval(MolangEvaluator evaluator, String input) {
         var actual = evaluator.eval(new MolangParser(input).parse());
         assertEquals(List.of(), evaluator.getErrors());

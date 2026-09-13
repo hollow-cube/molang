@@ -49,6 +49,11 @@ public class TestMolangParser {
                 "0 ? v.x = 1 : 2",
                 "(? 0.0 (= (. v x) 1.0) 2.0)"
             ),
+            Arguments.of("statements", "v.x = 1; v.x", "{ (= (. v x) 1.0); (. v x) }"),
+            Arguments.of("trailing semicolon", "1;", "1.0"),
+            Arguments.of("blank statements", "\n1;\n\n;2;\n", "{ 1.0; 2.0 }"),
+            Arguments.of("block without final semicolon", "{1; 2}", "{ 1.0; 2.0 }"),
+            Arguments.of("empty block", "loop(2, {})", "(? loop 2.0 { })"),
             Arguments.of("normalize case 1", "q.is_alive()", "(. q is_alive)"),
             Arguments.of("empty call operand", "q.is_alive() + 1", "(+ (. q is_alive) 1.0)"),
             Arguments.of("trailing whitespace", "1 + 2 \n", "(+ 1.0 2.0)"),
@@ -63,7 +68,7 @@ public class TestMolangParser {
     }
 
     @MethodSource("invalidInputs")
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "[{0}]")
     public void testInvalidInputs(String input) {
         assertThrows(IllegalStateException.class, () -> new MolangParser(input).parse());
     }
@@ -80,7 +85,12 @@ public class TestMolangParser {
             "a = 1",
             "1 + v.x = 2",
             "v.x =",
-            "v.x = = 1"
+            "v.x = = 1",
+            "",
+            ";",
+            "1; 2 3",
+            "{1; 2",
+            "1 }"
         );
     }
 }
