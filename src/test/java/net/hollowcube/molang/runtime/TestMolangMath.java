@@ -1,14 +1,13 @@
 package net.hollowcube.molang.runtime;
 
-import net.hollowcube.molang.MolangParser;
-import net.hollowcube.molang.eval.MolangEvaluator;
+import net.hollowcube.molang.MolangProgram;
+import net.hollowcube.molang.MolangState;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,8 +18,8 @@ public class TestMolangMath {
     @MethodSource("cases")
     @ParameterizedTest(name = "{0}")
     public void testMatchesMolangJs(String input, double expected) {
-        var evaluator = new MolangEvaluator(Map.of());
-        var actual = evaluator.eval(new MolangParser(input).parse());
+        var evaluator = new MolangState();
+        var actual = MolangProgram.compile(input).eval(evaluator);
 
         assertEquals(List.of(), evaluator.getErrors());
         assertEquals(expected, actual, 1e-9);
@@ -57,8 +56,8 @@ public class TestMolangMath {
     }
 
     private static double evalWithoutErrors(String input) {
-        var evaluator = new MolangEvaluator(Map.of());
-        var actual = evaluator.eval(new MolangParser(input).parse());
+        var evaluator = new MolangState();
+        var actual = MolangProgram.compile(input).eval(evaluator);
         assertEquals(List.of(), evaluator.getErrors());
         return actual;
     }
@@ -66,14 +65,14 @@ public class TestMolangMath {
     @MethodSource("domainErrors")
     @ParameterizedTest(name = "{0}")
     public void testDomainErrorEvaluatesToZero(String input) {
-        var evaluator = new MolangEvaluator(Map.of());
-        var actual = evaluator.eval(new MolangParser(input).parse());
+        var evaluator = new MolangState();
+        var actual = MolangProgram.compile(input).eval(evaluator);
 
         assertEquals(1, evaluator.getErrors().size(), () -> evaluator.getErrors().toString());
         assertEquals(0.0, actual);
     }
 
-    private static Stream<String> domainErrors() {
+    public static Stream<String> domainErrors() {
         return Stream.of(
             "math.sqrt(-1)",
             "math.ln(0)",

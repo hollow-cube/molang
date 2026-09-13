@@ -32,6 +32,9 @@ java {
 
 tasks.test {
     useJUnitPlatform()
+    listOf("molang.fuzz.seed", "molang.fuzz.iterations").forEach { name ->
+        System.getProperty(name)?.let { systemProperty(name, it) }
+    }
 }
 
 nmcpAggregation {

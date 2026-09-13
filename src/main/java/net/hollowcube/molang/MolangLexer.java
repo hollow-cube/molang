@@ -36,6 +36,7 @@ final class MolangLexer {
     private final String source;
 
     private int start = 0;
+    private int tokenStart = 0; // start, after leading whitespace
     private int cursor = 0;
 
     public MolangLexer(String source) {
@@ -45,12 +46,13 @@ final class MolangLexer {
     /**
      * Returns the next token in the input, or null if the end of file was reached.
      *
-     * @throws IllegalStateException if there is an unexpected token.
+     * @throws MolangParseException if there is an unexpected token.
      */
     public @Nullable Tok next() {
         start = cursor;
 
         consumeWhitespace();
+        tokenStart = cursor;
         if (atEnd()) return null;
 
         char c = advance();
@@ -65,7 +67,7 @@ final class MolangLexer {
      * Returns the next token <i>without</i> stepping to the next token in the input,
      * or null if the end of file was reached.
      *
-     * @throws IllegalStateException if there is an unexpected token.
+     * @throws MolangParseException if there is an unexpected token.
      */
     public @Nullable Tok peek() {
         var result = next();
@@ -75,7 +77,26 @@ final class MolangLexer {
 
     public void expect(Tok type) {
         var next = next();
-        if (next != type) throw new IllegalStateException("Expected " + type + " but got " + next);
+        if (next != type)
+            throw error(
+                next == null
+                    ? "expected " + type + " but reached the end"
+                    : "expected " + type + " but got " + next
+            );
+    }
+
+    /// Where the last token returned by [#next()] starts, or the end of input if there was none.
+    public int tokenStart() {
+        return tokenStart;
+    }
+
+    /// A parse error at the last token returned by [#next()].
+    public MolangParseException error(String reason) {
+        return error(reason, tokenStart);
+    }
+
+    public MolangParseException error(String reason, int position) {
+        return new MolangParseException(reason, source, position);
     }
 
     public String span() {
@@ -104,7 +125,7 @@ final class MolangLexer {
     /// A single quoted string. Molang has no escapes, so a string cannot contain `'`.
     private Tok string() {
         while (!atEnd() && peek0() != '\'') advance();
-        if (atEnd()) throw new IllegalStateException("unterminated string starting at " + start);
+        if (atEnd()) throw new MolangParseException("unterminated string", source, tokenStart);
         advance(); // Closing quote
         return Tok.STRING;
     }
@@ -116,6 +137,17 @@ final class MolangLexer {
         // Decimal, if present
         if (match('.')) {
             while (isDigit(peek0())) advance();
+        }
+
+        // Exponent, if present (eg 3.27e-7). Molang has none, but numbers written by other tools
+        // often do, and `e` directly after a number is otherwise a syntax error.
+        char e = peek0();
+        if (e == 'e' || e == 'E') {
+            int digits = peekAt(1) == '+' || peekAt(1) == '-' ? 2 : 1;
+            if (isDigit(peekAt(digits))) {
+                cursor += digits;
+                while (isDigit(peek0())) advance();
+            }
         }
 
         return Tok.NUMBER;
@@ -155,8 +187,13 @@ final class MolangLexer {
         return source.charAt(cursor);
     }
 
+    private char peekAt(int offset) {
+        int index = cursor + offset;
+        return index < source.length() ? source.charAt(index) : '\u0000';
+    }
+
     private char advance() {
-        if (atEnd()) throw new IllegalStateException("unexpected end of input");
+        if (atEnd()) throw new MolangParseException("unexpected end of input", source, cursor);
         return source.charAt(cursor++);
     }
 
@@ -176,6 +213,6 @@ final class MolangLexer {
     }
 
     private Tok unexpected(char c) {
-        throw new IllegalStateException(String.format("unexpected token '%s' at %d.", c, cursor));
+        throw new MolangParseException("unexpected character '" + c + "'", source, cursor - 1);
     }
 }

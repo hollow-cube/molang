@@ -1,5 +1,6 @@
 package net.hollowcube.molang;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -29,6 +30,9 @@ public class TestMolangParser {
             Arguments.of("negate simple", "-1", "(- 1.0)"),
             Arguments.of("negate nested", "---1", "(- (- (- 1.0)))"),
             Arguments.of("negate precedence", "-2 + 1", "(+ (- 2.0) 1.0)"),
+            Arguments.of("unary plus", "+1", "(+ 1.0)"),
+            Arguments.of("unary plus after operator", "2 * +3", "(* 2.0 (+ 3.0))"),
+            Arguments.of("unary plus and minus", "-+1", "(- (+ 1.0))"),
             Arguments.of("basic access", "a.b", "(. a b)"),
             Arguments.of("access/add precedence", "a.b + 1", "(+ (. a b) 1.0)"),
             Arguments.of("null coalesce precedence", "a.b ?? 1", "(?? (. a b) 1.0)"),
@@ -109,6 +113,8 @@ public class TestMolangParser {
             ),
             Arguments.of("case-insensitive return", "RETURN 1", "(return 1.0)"),
             Arguments.of("normalize case 1", "q.is_alive()", "(. q is_alive)"),
+            Arguments.of("global zero argument call", "foo()", "(? foo )"),
+            Arguments.of("grouped member zero argument call", "(q.foo)()", "(. q foo)"),
             Arguments.of("empty call operand", "q.is_alive() + 1", "(+ (. q is_alive) 1.0)"),
             Arguments.of("trailing whitespace", "1 + 2 \n", "(+ 1.0 2.0)"),
             Arguments.of("normalize case 2", "q.is_alive", "(. q is_alive)"),
@@ -117,14 +123,71 @@ public class TestMolangParser {
             Arguments.of("ternary add precedence", "1 ? 2 + 3 : 4", "(? 1.0 (+ 2.0 3.0) 4.0)"),
             Arguments.of("loop call", "loop(10, {})", "(? loop 10.0 { })"),
             Arguments.of("lt eq precedence 1", "1 < 2 == 3", "(== (< 1.0 2.0) 3.0)"),
-            Arguments.of("lt eq precedence 2", "1 == 2 < 3", "(== 1.0 (< 2.0 3.0))")
+            Arguments.of("lt eq precedence 2", "1 == 2 < 3", "(== 1.0 (< 2.0 3.0))"),
+            Arguments.of("exponent", "3.27e-7", "3.27E-7"),
+            Arguments.of("exponent upper case", "2E3", "2000.0"),
+            Arguments.of("exponent plus", "1.5e+2 * q.x", "(* 150.0 (. q x))"),
+            Arguments.of("exponent without fraction", "1e2", "100.0"),
+            Arguments.of("exponent after dot", "1.e1", "10.0")
         );
     }
 
     @MethodSource("invalidInputs")
     @ParameterizedTest(name = "[{0}]")
     public void testInvalidInputs(String input) {
-        assertThrows(IllegalStateException.class, () -> new MolangParser(input).parse());
+        assertThrows(MolangParseException.class, () -> new MolangParser(input).parse());
+    }
+
+    @Test
+    public void testExpressionPositions() {
+        var expr = (MolangExpr.Block) new MolangParser("v.a = -q.b;\n2 * math.sin(1) ? 'x'")
+            .parse();
+        var assign = (MolangExpr.Assign) expr.exprs().get(0);
+        assertEquals(4, assign.position()); // =
+        assertEquals(0, assign.target().position()); // v.a
+        assertEquals(6, assign.value().position()); // -
+        var ternary = (MolangExpr.Ternary) expr.exprs().get(1);
+        assertEquals(28, ternary.position()); // ?
+        var product = (MolangExpr.Binary) ternary.cond();
+        assertEquals(14, product.position()); // *
+        assertEquals(16, product.rhs().position()); // math.sin(1)
+        assertEquals(30, ternary.thenExpr().position()); // 'x'
+        assertEquals(-1, new MolangExpr.Num(1).position());
+    }
+
+    @Test
+    public void testParseErrorsNameTheirLocation() {
+        var error = assertThrows(
+            MolangParseException.class,
+            () -> new MolangParser("v.a = 1;\nv.b = 2 3;").parse()
+        );
+        assertEquals("v.a = 1;\nv.b = 2 3;", error.source());
+        assertEquals(17, error.position());
+        assertEquals(2, error.line());
+        assertEquals(9, error.column());
+        assertEquals("unexpected NUMBER after expression at line 2, column 9", error.getMessage());
+
+        var end = assertThrows(MolangParseException.class, () -> new MolangParser("1 +").parse());
+        assertEquals(3, end.position());
+        assertEquals("unexpected end of input", end.reason());
+
+        var assign = assertThrows(
+            MolangParseException.class,
+            () -> new MolangParser("a = 1").parse()
+        );
+        assertEquals(2, assign.position());
+
+        var character = assertThrows(
+            MolangParseException.class,
+            () -> new MolangParser("1 # 2").parse()
+        );
+        assertEquals(2, character.position());
+
+        var string = assertThrows(
+            MolangParseException.class,
+            () -> new MolangParser("1 + 'abc").parse()
+        );
+        assertEquals(4, string.position());
     }
 
     private static Stream<String> invalidInputs() {
@@ -145,7 +208,11 @@ public class TestMolangParser {
             "'abc",
             "'a'b'",
             "'it''s'",
-            "1 }"
+            "1 }",
+            "1e",
+            "1e+",
+            "2ex",
+            "1e2.5"
         );
     }
 }

@@ -6,12 +6,13 @@ final class MolangPrinter {
 
     public static String print(MolangExpr expr) {
         return switch (expr) {
-            case MolangExpr.Num(var value) -> String.valueOf(value);
-            case MolangExpr.Str(var value) -> "'" + value + "'";
-            case MolangExpr.Ident(var value) -> value;
+            case MolangExpr.Num(var value, _) -> String.valueOf(value);
+            case MolangExpr.Str(var value, _) -> "'" + value + "'";
+            case MolangExpr.Ident(var value, _) -> value;
             case MolangExpr.Unary(
                 var op,
-                var rhs
+                var rhs,
+                _
             ) -> String.format("(%s %s)", unaryOp(op), print(rhs));
             case MolangExpr.Binary binary -> String.format(
                 "(%s %s %s)",
@@ -22,26 +23,31 @@ final class MolangPrinter {
             case MolangExpr.Ternary(
                 var cond,
                 var thenExpr,
-                var elseExpr
+                var elseExpr,
+                _
             ) -> String.format("(? %s %s %s)", print(cond), print(thenExpr), print(elseExpr));
             case MolangExpr.Access(
                 var lhs,
-                var field
+                var field,
+                _
             ) -> String.format("(. %s %s)", print(lhs), field);
             case MolangExpr.Call(
                 var lhs,
-                var args
+                var args,
+                _
             ) -> String.format(
                 "(? %s %s)", print(lhs),
                 args.stream().map(MolangPrinter::print).collect(Collectors.joining(" "))
             );
             case MolangExpr.Assign(
                 var target,
-                var value
+                var value,
+                _
             ) -> String.format("(= %s %s)", print(target), print(value));
-            case MolangExpr.Return(var value) -> String.format("(return %s)", print(value));
+            case MolangExpr.Return(var value, _) -> String.format("(return %s)", print(value));
             case MolangExpr.Block(
-                var exprs
+                var exprs,
+                _
             ) -> exprs.isEmpty()
                 ? "{ }"
                 : String.format(
@@ -54,6 +60,7 @@ final class MolangPrinter {
     private static String unaryOp(MolangExpr.Unary.Op op) {
         return switch (op) {
             case NEGATE -> "-";
+            case PLUS -> "+";
             case NOT -> "!";
         };
     }

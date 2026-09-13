@@ -3,17 +3,24 @@ package net.hollowcube.molang;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public sealed interface MolangExpr {
+/// A parsed Molang expression. Internal: hosts compile source with [MolangEnvironment#compile(String)].
+///
+/// Every expression has a `position`: the index in its source it is reported at, eg its first
+/// character, or the operator of a binary expression (`/` for a division by zero). It is -1 for an
+/// expression that was not parsed from source.
+sealed interface MolangExpr {
 
-    static MolangExpr parseOrThrow(String source) {
-        return parseOrThrow(source, false);
+    int position();
+
+    /// Molang names are case-insensitive, so names are compared in this form: lowercase.
+    static String normalizeName(String name) {
+        return name.toLowerCase(java.util.Locale.ROOT);
     }
 
-    static MolangExpr parseOrThrow(String source, boolean multiline) {
-        return new MolangParser(source, multiline).parse();
-    }
-
-    record Num(double value) implements MolangExpr {
+    record Num(double value, int position) implements MolangExpr {
+        public Num(double value) {
+            this(value, -1);
+        }
 
         @Override
         public String toString() {
@@ -21,7 +28,10 @@ public sealed interface MolangExpr {
         }
     }
 
-    record Str(String value) implements MolangExpr {
+    record Str(String value, int position) implements MolangExpr {
+        public Str(String value) {
+            this(value, -1);
+        }
 
         @Override
         public String toString() {
@@ -29,7 +39,10 @@ public sealed interface MolangExpr {
         }
     }
 
-    record Ident(String value) implements MolangExpr {
+    record Ident(String value, int position) implements MolangExpr {
+        public Ident(String value) {
+            this(value, -1);
+        }
 
         @Override
         public String toString() {
@@ -37,9 +50,14 @@ public sealed interface MolangExpr {
         }
     }
 
-    record Unary(Op op, MolangExpr rhs) implements MolangExpr {
+    record Unary(Op op, MolangExpr rhs, int position) implements MolangExpr {
+        public Unary(Op op, MolangExpr rhs) {
+            this(op, rhs, -1);
+        }
+
         public enum Op {
             NEGATE,
+            PLUS,
             NOT,
         }
 
@@ -47,12 +65,17 @@ public sealed interface MolangExpr {
         public String toString() {
             return switch (op) {
                 case NEGATE -> "-" + rhs;
+                case PLUS -> "+" + rhs;
                 case NOT -> "!" + rhs;
             };
         }
     }
 
-    record Binary(Op op, MolangExpr lhs, MolangExpr rhs) implements MolangExpr {
+    record Binary(Op op, MolangExpr lhs, MolangExpr rhs, int position) implements MolangExpr {
+        public Binary(Op op, MolangExpr lhs, MolangExpr rhs) {
+            this(op, lhs, rhs, -1);
+        }
+
         public enum Op {
             PLUS("+"),
             MINUS("-"),
@@ -61,7 +84,7 @@ public sealed interface MolangExpr {
             NULL_COALESCE("??"),
             GTE(">="),
             GT(">"),
-            LTE(">="),
+            LTE("<="),
             LT("<"),
             EQ("=="),
             NEQ("!="),
@@ -89,8 +112,12 @@ public sealed interface MolangExpr {
     record Ternary(
         MolangExpr cond,
         MolangExpr thenExpr,
-        MolangExpr elseExpr
+        MolangExpr elseExpr,
+        int position
     ) implements MolangExpr {
+        public Ternary(MolangExpr cond, MolangExpr thenExpr, MolangExpr elseExpr) {
+            this(cond, thenExpr, elseExpr, -1);
+        }
 
         @Override
         public String toString() {
@@ -98,7 +125,10 @@ public sealed interface MolangExpr {
         }
     }
 
-    record Access(MolangExpr lhs, String field) implements MolangExpr {
+    record Access(MolangExpr lhs, String field, int position) implements MolangExpr {
+        public Access(MolangExpr lhs, String field) {
+            this(lhs, field, -1);
+        }
 
         @Override
         public String toString() {
@@ -107,7 +137,10 @@ public sealed interface MolangExpr {
     }
 
     /// Assignment to a field of a writable holder (eg `v.x = 1`), which evaluates to 0.
-    record Assign(Access target, MolangExpr value) implements MolangExpr {
+    record Assign(Access target, MolangExpr value, int position) implements MolangExpr {
+        public Assign(Access target, MolangExpr value) {
+            this(target, value, -1);
+        }
 
         @Override
         public String toString() {
@@ -116,7 +149,10 @@ public sealed interface MolangExpr {
     }
 
     /// `return value`, which stops evaluation of the whole expression and yields value.
-    record Return(MolangExpr value) implements MolangExpr {
+    record Return(MolangExpr value, int position) implements MolangExpr {
+        public Return(MolangExpr value) {
+            this(value, -1);
+        }
 
         @Override
         public String toString() {
@@ -124,7 +160,10 @@ public sealed interface MolangExpr {
         }
     }
 
-    record Call(MolangExpr lhs, List<MolangExpr> args) implements MolangExpr {
+    record Call(MolangExpr lhs, List<MolangExpr> args, int position) implements MolangExpr {
+        public Call(MolangExpr lhs, List<MolangExpr> args) {
+            this(lhs, args, -1);
+        }
 
         @Override
         public String toString() {
@@ -135,7 +174,10 @@ public sealed interface MolangExpr {
         }
     }
 
-    record Block(List<MolangExpr> exprs) implements MolangExpr {
+    record Block(List<MolangExpr> exprs, int position) implements MolangExpr {
+        public Block(List<MolangExpr> exprs) {
+            this(exprs, -1);
+        }
 
         @Override
         public String toString() {

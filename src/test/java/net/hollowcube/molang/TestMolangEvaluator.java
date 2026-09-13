@@ -1,72 +1,83 @@
-package net.hollowcube.molang.eval;
+package net.hollowcube.molang;
 
-import net.hollowcube.molang.MolangParser;
-import net.hollowcube.molang.runtime.MolangMath;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/// What expressions evaluate to.
 public class TestMolangEvaluator {
+    record Times(double animTime, double lifeTime) {}
+
+    static final MolangEnvironment<Times> TIMES = MolangEnvironment.<Times>builder()
+        .query(q -> q.number("anim_time", Times::animTime).number("life_time", Times::lifeTime))
+        .build();
 
     @MethodSource("inputPairs")
     @ParameterizedTest(name = "{0}")
     public void testInputPairs(String name, String input, String expected) {
-        var expr = new MolangParser(input).parse();
-        var actual = new MolangEvaluator(Map.of()).eval(expr);
-
-        assertEquals(expected, String.valueOf(actual));
+        assertEquals(expected, String.valueOf(eval(new MolangState(), input)));
     }
 
     @Test
     public void testAssignment() {
-        var evaluator = new MolangEvaluator(Map.of());
+        var state = new MolangState();
 
-        assertEquals(0, eval(evaluator, "v.x = 5"));
-        assertEquals(0, eval(evaluator, "variable.y = v.x * 2"));
-        assertEquals(0, eval(evaluator, "0 ? v.x = 1 : v.z = 3"));
-        assertEquals(5, eval(evaluator, "variable.x"));
-        assertEquals(10, eval(evaluator, "v.y"));
-        assertEquals(3, eval(evaluator, "v.z"));
-        assertEquals(new MolangValue.Num(5), evaluator.getVariable("x"));
+        assertEquals(0, eval(state, "v.x = 5"));
+        assertEquals(0, eval(state, "variable.y = v.x * 2"));
+        assertEquals(0, eval(state, "0 ? v.x = 1 : v.z = 3"));
+        assertEquals(5, eval(state, "variable.x"));
+        assertEquals(10, eval(state, "v.y"));
+        assertEquals(3, eval(state, "v.z"));
+        assertEquals(new MolangValue.Num(5), state.getVariable("x"));
     }
 
     @Test
     public void testTempAssignmentIsScopedToOneEvaluation() {
-        var evaluator = new MolangEvaluator(Map.of());
+        var state = new MolangState();
 
-        assertEquals(0, eval(evaluator, "t.x = 5"));
-        assertEquals(0, eval(evaluator, "temp.y = 5"));
-        assertEquals(7, eval(evaluator, "(t.x ?? 7) + (temp.y ?? 0)"));
+        assertEquals(0, eval(state, "t.x = 5"));
+        assertEquals(0, eval(state, "temp.y = 5"));
+        assertEquals(7, eval(state, "(t.x ?? 7) + (temp.y ?? 0)"));
     }
 
     @Test
-    public void testAssignmentToReadOnlyHolder() {
-        var evaluator = new MolangEvaluator(Map.of());
-        assertEquals(0, evaluator.eval(new MolangParser("math.pi = 3").parse()));
-        assertEquals(1, evaluator.getErrors().size(), () -> evaluator.getErrors().toString());
+    public void testAssignmentToAnythingButVariables() {
+        var state = new MolangState();
+        for (String input : List.of("math.pi = 3", "q.x = 3", "c.x = 3")) {
+            assertEquals(0, compile(MolangEnvironment.empty(), input).eval(state), input);
+            assertEquals(1, state.getErrors().size(), () -> input + ": " + state.getErrors());
+        }
+    }
+
+    @Test
+    public void testHostVariables() {
+        var state = new MolangState();
+        state.setVariable("Speed", 2);
+        state.setVariable("name", new MolangValue.Str("Pig"));
+        assertEquals(4, eval(state, "v.speed * 2"));
+        assertEquals(1, eval(state, "v.name == 'Pig'"));
+        state.clearVariables();
+        assertEquals(MolangValue.NULL, state.getVariable("speed"));
     }
 
     @MethodSource("scripts")
     @ParameterizedTest(name = "{0}")
     public void testScripts(String input, double expected) {
-        var query = MolangValue.Holder.holder(
-            Map.of("anim_time", new MolangValue.Num(0.3), "life_time", new MolangValue.Num(0.7))
-        );
-        var evaluator = new MolangEvaluator(Map.of("q", query, "query", query));
-        assertEquals(expected, eval(evaluator, input), 1e-9);
+        var state = new MolangState();
+        var actual = compile(TIMES, input).eval(state, new Times(0.3, 0.7));
+        assertEquals(List.of(), state.getErrors());
+        assertEquals(expected, actual, 1e-9);
     }
 
     // Expected values are the results of evaluating the same script with Blockbench's molangjs (1.7.0),
     // with q.anim_time = 0.3 and q.life_time = 0.7.
-    private static Stream<Arguments> scripts() {
+    static Stream<Arguments> scripts() {
         return Stream.of(
             Arguments.of("v.a = 2; v.a * 5", 10),
             Arguments.of("v.a = 2; v.b = 4;", 0),
@@ -121,96 +132,47 @@ public class TestMolangEvaluator {
 
     @Test
     public void testReturnSkipsLaterStatements() {
-        var evaluator = new MolangEvaluator(Map.of());
-        assertEquals(2, eval(evaluator, "v.a = 1; return v.a + 1; v.a = 9"));
-        assertEquals(1, eval(evaluator, "v.a"));
+        var state = new MolangState();
+        assertEquals(2, eval(state, "v.a = 1; return v.a + 1; v.a = 9"));
+        assertEquals(1, eval(state, "v.a"));
     }
 
     @Test
     public void testStrings() {
-        MolangValue.Function isNamed = args -> new MolangValue.Num(
-            args.size() == 1
-                && args.getFirst() instanceof MolangValue.Str(var name)
-                && name.equals("Bob")
-        );
-        var evaluator = new MolangEvaluator(
-            Map.of("q", MolangValue.Holder.holder(Map.of("is_named", isNamed)))
-        );
+        var environment = MolangEnvironment.<String>builder()
+            .query(q -> q.stringFunction("is_named", (name, text) -> name.equals(text) ? 1 : 0))
+            .build();
+        var state = new MolangState();
 
-        assertEquals(1, eval(evaluator, "'Pig' == 'Pig'"));
-        assertEquals(0, eval(evaluator, "'Pig' == 'pig'"));
-        assertEquals(1, eval(evaluator, "'Pig' != 'pig'"));
-        assertEquals(1, eval(evaluator, "'' == ''"));
-        assertEquals(1, eval(evaluator, "q.is_named('Bob')"));
-        assertEquals(0, eval(evaluator, "q.is_named('bob')"));
-        assertEquals(1, eval(evaluator, "v.name = 'Moo'; v.name == 'Moo'"));
-        assertEquals(new MolangValue.Str("Moo"), evaluator.getVariable("name"));
-    }
-
-    @Test
-    public void testHostNamesAreCaseInsensitive() {
-        var query = MolangValue.Holder.holder(
-            Map.of("Anim_Time", new MolangValue.Num(0.3), "isAlive", new MolangValue.Num(1))
-        );
-        var evaluator = new MolangEvaluator(Map.of("Q", query, "Query", query));
-
-        assertEquals(0.3, eval(evaluator, "q.anim_time"));
-        assertEquals(0.3, eval(evaluator, "Query.ANIM_TIME"));
-        assertEquals(1, eval(evaluator, "q.isAlive"));
-        assertEquals(1, eval(evaluator, "query.isalive"));
-        assertEquals(new MolangValue.Num(0.3), query.get("ANIM_time"));
-        assertEquals(
-            new MolangValue.Num(5),
-            MolangMath.MODULE.get("Lerp") instanceof MolangValue.Function lerp
-                ? lerp.apply(
-                    List.of(
-                        new MolangValue.Num(0),
-                        new MolangValue.Num(10),
-                        new MolangValue.Num(0.5)
-                    )
-                )
-                : MolangValue.NIL
-        );
+        assertEquals(1, eval(state, "'Pig' == 'Pig'"));
+        assertEquals(0, eval(state, "'Pig' == 'pig'"));
+        assertEquals(1, eval(state, "'Pig' != 'pig'"));
+        assertEquals(1, eval(state, "'' == ''"));
+        assertEquals(1, compile(environment, "q.is_named('Bob')").eval(state, "Bob"));
+        assertEquals(0, compile(environment, "q.is_named('bob')").eval(state, "Bob"));
+        assertEquals(1, eval(state, "v.name = 'Moo'; v.name == 'Moo'"));
+        assertEquals(new MolangValue.Str("Moo"), state.getVariable("name"));
     }
 
     @Test
     public void testVariablesAreCaseInsensitive() {
-        var evaluator = new MolangEvaluator(Map.of());
-        eval(evaluator, "V.Foo = 3");
-        assertEquals(new MolangValue.Num(3), evaluator.getVariable("FOO"));
-        assertEquals(new MolangValue.Num(3), evaluator.getVariable("foo"));
-    }
-
-    @Test
-    public void testNamesDifferingOnlyByCaseAreRejected() {
-        var one = new MolangValue.Num(1);
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> MolangValue.Holder.holder(Map.of("a", one, "A", one))
-        );
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> new MolangEvaluator(Map.of("q", one, "Q", one))
-        );
-    }
-
-    private static double eval(MolangEvaluator evaluator, String input) {
-        var actual = evaluator.eval(new MolangParser(input).parse());
-        assertEquals(List.of(), evaluator.getErrors());
-        return actual;
+        var state = new MolangState();
+        eval(state, "V.Foo = 3");
+        assertEquals(new MolangValue.Num(3), state.getVariable("FOO"));
+        assertEquals(new MolangValue.Num(3), state.getVariable("foo"));
     }
 
     @MethodSource("contentErrors")
     @ParameterizedTest(name = "[{0}]")
     public void testContentErrorEvaluatesToZero(String input, double expected) {
-        var evaluator = new MolangEvaluator(Map.of());
-        var actual = evaluator.eval(new MolangParser(input).parse());
+        var state = new MolangState();
+        var actual = compile(MolangEnvironment.empty(), input).eval(state);
 
-        assertEquals(1, evaluator.getErrors().size(), () -> evaluator.getErrors().toString());
+        assertEquals(1, state.getErrors().size(), () -> state.getErrors().toString());
         assertEquals(expected, actual);
     }
 
-    private static Stream<Arguments> contentErrors() {
+    static Stream<Arguments> contentErrors() {
         return Stream.of(
             Arguments.of("", 0),
             Arguments.of(";", 0),
@@ -229,7 +191,7 @@ public class TestMolangEvaluator {
         );
     }
 
-    private static Stream<Arguments> inputPairs() {
+    static Stream<Arguments> inputPairs() {
         return Stream.of(
             Arguments.of("basic number", "1", "1.0"),
             Arguments.of("basic arithmetic", "1+4", "5.0"),
@@ -248,4 +210,14 @@ public class TestMolangEvaluator {
         );
     }
 
+    static <T> MolangProgram<T> compile(MolangEnvironment<T> environment, String input) {
+        return environment.compile(input);
+    }
+
+    /// Evaluates an expression that must report no content errors.
+    static double eval(MolangState state, String input) {
+        var actual = compile(MolangEnvironment.empty(), input).eval(state);
+        assertEquals(List.of(), state.getErrors(), input);
+        return actual;
+    }
 }
