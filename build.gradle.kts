@@ -4,6 +4,7 @@ plugins {
     `maven-publish`
     signing
     alias(libs.plugins.nmcp)
+    alias(libs.plugins.javafmt)
 }
 
 group = "dev.hollowcube"
