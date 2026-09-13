@@ -112,7 +112,8 @@ public final class MolangProgram<T> {
     ///                         included, since they do not depend on the context.
     /// @param dynamicNames     the names answered by dynamic resolvers, eg `query.props.owner`
     /// @param unresolvedNames  the names the environment does not have (eg `query.typo`), which
-    ///                         evaluate to null, so a loader may want to warn about them
+    ///                         evaluate to null (and calling one is a content error), so a loader
+    ///                         may want to warn about them
     /// @param variablesRead    the state's own variables the program reads, eg `variable.speed`
     /// @param variablesWritten the state's own variables the program assigns
     /// @param usesTemps        whether the program reads or writes any `temp`
@@ -1217,8 +1218,8 @@ public final class MolangProgram<T> {
     private static final int ATAN2 = 200, COPY_SIGN = 201, MAX = 202, MIN = 203, MOD = 204, POW = 205, RANDOM = 206, RANDOM_INTEGER = 207;
     private static final int CLAMP = 300, DIE_ROLL = 301, DIE_ROLL_INTEGER = 302, EASE_IN_BACK = 303, EASE_IN_BOUNCE = 304, EASE_IN_CIRC = 305, EASE_IN_CUBIC = 306, EASE_IN_ELASTIC = 307, EASE_IN_EXPO = 308, EASE_IN_OUT_BACK = 309, EASE_IN_OUT_BOUNCE = 310, EASE_IN_OUT_CIRC = 311, EASE_IN_OUT_CUBIC = 312, EASE_IN_OUT_ELASTIC = 313, EASE_IN_OUT_EXPO = 314, EASE_IN_OUT_QUAD = 315, EASE_IN_OUT_QUART = 316, EASE_IN_OUT_QUINT = 317, EASE_IN_OUT_SINE = 318, EASE_IN_QUAD = 319, EASE_IN_QUART = 320, EASE_IN_QUINT = 321, EASE_IN_SINE = 322, EASE_OUT_BACK = 323, EASE_OUT_BOUNCE = 324, EASE_OUT_CIRC = 325, EASE_OUT_CUBIC = 326, EASE_OUT_ELASTIC = 327, EASE_OUT_EXPO = 328, EASE_OUT_QUAD = 329, EASE_OUT_QUART = 330, EASE_OUT_QUINT = 331, EASE_OUT_SINE = 332, INVERSE_LERP = 333, LERP = 334, LERPROTATE = 335;
 
-    /// Every function [MolangMath#MODULE] provides, by the name it is registered under. The
-    /// messages in MolangMath's own arity errors name some differently (eg `lerp_rotate`).
+    /// Every `math` function, by its Molang name, implemented by the [MolangMath] method of the same
+    /// name in camel case.
     static final Map<String, Integer> MATH_FUNCTIONS = Map.ofEntries(
         Map.entry("pi", PI),
         Map.entry("abs", ABS),
@@ -1510,6 +1511,18 @@ public final class MolangProgram<T> {
             }
 
             var root = environment.root;
+            // q and c are Bedrock's aliases of query and context, even when those are not registered
+            String alias = switch (head) {
+                case "q" -> "query";
+                case "c" -> "context";
+                default -> null;
+            };
+            if (alias != null && !root.entries().containsKey(head)) {
+                head = alias;
+                path = new ArrayList<>(path);
+                path.set(0, alias);
+                written = String.join(".", path);
+            }
             Entry entry = root.entries().get(head);
             if (entry != null) return walk(entry, canonical(entry, head), 1, path, args);
             if (root.fallback() != null) return dynamic(root.fallback(), "", 0, path, args);

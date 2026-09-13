@@ -6,7 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-/// Execution state for evals of the same script instance. Not thread-safe.
+/// Execution state for one context (eg an entity): its variables, shared by every program evaluated
+/// with it, and the content errors of the last evaluation. Not thread-safe.
 public final class MolangState {
     public static final int MAX_LOOP_COUNTER = 1024; // Arbitrary limit to prevent massive loops.
 
@@ -36,7 +37,7 @@ public final class MolangState {
         return new MolangState(this);
     }
 
-    /// The value of `variable.name`, or null if it is unset.
+    /// The value of `variable.name`, or [MolangValue#NULL] if it is unset.
     public MolangValue getVariable(String name) {
         return variable.get(name);
     }

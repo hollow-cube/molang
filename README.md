@@ -87,7 +87,8 @@ can use `MolangProgram.compile(source)` and `program.eval(state)`.
 - `constant()`: its value if it was folded entirely, eg to skip evaluating it. 
   - Eg the first example would hold a constant of 5.0
 - `hostNames()`, `dynamicNames()` and `unresolvedNames()`: the names it reads, as canonical names (`q.x` is reported
-  as `query.x`). Unresolved names evaluate to null, so a loader may want to warn about them.
+  as `query.x`). Unresolved names evaluate to null (and calling one is a content error), so a loader may want to warn
+  about them.
 - `variablesRead()`, `variablesWritten()`, `usesTemps()` and `random()`.
 - `dependsOnlyOn(names)`: whether its result depends only on the given host names, eg to precompute the frames of an
   animation that reads nothing but `query.anim_time`.

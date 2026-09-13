@@ -77,6 +77,23 @@ public class TestMolangEnvironment {
             program.analysis().unresolvedNames()
         );
 
+        // q and c are always query and context, even when the environment does not have them
+        assertEquals(
+            Set.of("query.typo", "context.x", "query"),
+            MolangProgram.compile("(q.typo ?? 0) + (C.x ?? 0) + (q ?? 0)")
+                .analysis()
+                .unresolvedNames()
+        );
+        assertEquals(
+            Set.of("q.x"),
+            MolangEnvironment.builder()
+                .namespace("q", q -> q.constant("y", 1))
+                .build()
+                .compile("q.x ?? q.y")
+                .analysis()
+                .unresolvedNames()
+        );
+
         var state = new MolangState();
         var ctx = new Keyframe(0, new Entity(false, "", 1));
         assertEquals(3, KEYFRAMES.compile("q.typo ?? 3").eval(state, ctx));
