@@ -21,6 +21,26 @@ public class TestMolangEvaluator {
         assertEquals(expected, String.valueOf(actual));
     }
 
+    @MethodSource("contentErrors")
+    @ParameterizedTest(name = "{0}")
+    public void testContentErrorEvaluatesToZero(String input, double expected) {
+        var evaluator = new MolangEvaluator(Map.of());
+        var actual = evaluator.eval(new MolangParser(input).parse());
+
+        assertEquals(1, evaluator.getErrors().size(), () -> evaluator.getErrors().toString());
+        assertEquals(expected, actual);
+    }
+
+    private static Stream<Arguments> contentErrors() {
+        return Stream.of(
+                Arguments.of("math.asin(2)", 0),
+                Arguments.of("math.asin(2) + 1", 1),
+                Arguments.of("math.max(math.asin(2), 5)", 5),
+                Arguments.of("math.max(math.mod(5, 0), -5)", 0),
+                Arguments.of("math.asin(2) ?? 5", 0)
+        );
+    }
+
     private static Stream<Arguments> inputPairs() {
         return Stream.of(
                 Arguments.of("basic number",

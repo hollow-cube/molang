@@ -218,7 +218,9 @@ public final class MolangEvaluator {
         try {
             return func.apply(args);
         } catch (MolangContentException e) {
+            // Content errors (eg a math domain error) evaluate to 0, as they do in Bedrock.
             errors.add(e.toContentError());
+            return new MolangValue.Num(0.0);
         } catch (Exception e) {
             errors.add(new ContentError("Error while calling function: " + func + ": " + e.getMessage()));
         }
