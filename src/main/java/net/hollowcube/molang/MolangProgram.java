@@ -212,9 +212,18 @@ public final class MolangProgram<T> {
         }
     }
 
-    /// Evaluates its operands for their side effects, then reports a content error. It gives null,
-    /// or 0 for a construct that always gives a number (eg an invalid assignment), so the error is
-    /// reported once rather than again when the result is used as a number.
+    /// The null a node gives after reporting a content error for its own value. Using it as a
+    /// number (or comparing it) reports nothing more, so each mistake is reported once. It is never
+    /// stored or passed to the host, which see [MolangValue#NULL] instead.
+    private static final MolangValue FAILED = new MolangValue.Null();
+
+    /// [#FAILED] as [MolangValue#NULL], for a value that leaves the expression.
+    private static MolangValue settled(MolangValue value) {
+        return value == FAILED ? MolangValue.NULL : value;
+    }
+
+    /// Evaluates its operands for their side effects, then reports a content error. It gives
+    /// [#FAILED], or 0 for a construct that always gives a number (eg an invalid assignment).
     private static final class ErrorNode extends Node {
         private static final MolangValue ZERO = new MolangValue.Num(0.0);
 
@@ -223,7 +232,7 @@ public final class MolangProgram<T> {
         final Node[] operands;
 
         ErrorNode(String message, Node... operands) {
-            this(message, MolangValue.NULL, operands);
+            this(message, FAILED, operands);
         }
 
         private ErrorNode(String message, MolangValue result, Node... operands) {
@@ -245,7 +254,7 @@ public final class MolangProgram<T> {
 
         @Override
         boolean numeric() {
-            return result != MolangValue.NULL;
+            return result != FAILED;
         }
     }
 
@@ -263,7 +272,7 @@ public final class MolangProgram<T> {
         MolangValue value(MolangState s, Object c) {
             if (!s.loopScope) {
                 s.error("Cannot use " + name + " outside of a loop", position);
-                return MolangValue.NULL;
+                return FAILED;
             }
             throw signal;
         }
@@ -309,7 +318,7 @@ public final class MolangProgram<T> {
         double num(MolangState s, Object c) {
             VariableStore store = temp ? s.temp : s.variable;
             if (value.numeric()) store.setNumber(name, value.num(s, c));
-            else store.set(name, value.value(s, c));
+            else store.set(name, settled(value.value(s, c)));
             return 0.0;
         }
     }
@@ -555,6 +564,7 @@ public final class MolangProgram<T> {
             }
             if (l instanceof MolangValue.Str(var ls) && r instanceof MolangValue.Str(var rs))
                 return equal == ls.equals(rs) ? 1.0 : 0.0;
+            if (l == FAILED || r == FAILED) return 0.0;
             s.error("Cannot compare " + l + " and " + r, position);
             return 0.0;
         }
@@ -686,12 +696,12 @@ public final class MolangProgram<T> {
         MolangValue value(MolangState s, Object c) {
             if (args.length != 2) {
                 s.error("loop requires exactly 2 arguments, got: " + args.length, position);
-                return MolangValue.NULL;
+                return FAILED;
             }
             int count = (int) args[0].num(s, c);
             if (!lastArgIsBlock) {
                 s.error("loop requires a block as the second argument", position);
-                return MolangValue.NULL;
+                return FAILED;
             }
             boolean lastLoopScope = s.loopScope;
             s.loopScope = true;
@@ -703,7 +713,7 @@ public final class MolangProgram<T> {
                                 + MolangState.MAX_LOOP_COUNTER,
                             position
                         );
-                        return MolangValue.NULL;
+                        return FAILED;
                     }
                     try {
                         args[1].exec(s, c);
@@ -737,6 +747,7 @@ public final class MolangProgram<T> {
             if (arg.numeric()) return arg.num(s, c);
             MolangValue value = arg.value(s, c);
             if (value instanceof MolangValue.Num(double number)) return number;
+            if (value == FAILED) return 0.0;
             s.error(
                 "Expected a number for argument " + (index + 1) + " of " + name + ", got " + value,
                 arg.position
@@ -948,7 +959,7 @@ public final class MolangProgram<T> {
                 return value == null ? MolangValue.NULL : new MolangValue.Num((Double) value);
             } catch (RuntimeException ex) {
                 reportFailure(s, name, ex, position);
-                return MolangValue.NULL;
+                return FAILED;
             }
         }
     }
@@ -970,7 +981,7 @@ public final class MolangProgram<T> {
                 return value == null ? MolangValue.NULL : new MolangValue.Str((String) value);
             } catch (RuntimeException ex) {
                 reportFailure(s, name, ex, position);
-                return MolangValue.NULL;
+                return FAILED;
             }
         }
     }
@@ -1048,6 +1059,7 @@ public final class MolangProgram<T> {
         double num(MolangState s, Object c) {
             MolangValue value = args[0].value(s, c);
             if (!(value instanceof MolangValue.Str(String text))) {
+                if (value == FAILED) return 0.0;
                 s.error("Expected a string for argument 1 of " + name + ", got " + value, position);
                 return 0.0;
             }
@@ -1174,7 +1186,7 @@ public final class MolangProgram<T> {
         @Override
         MolangValue value(MolangState s, Object c) {
             MolangValue[] values = new MolangValue[args.length];
-            for (int i = 0; i < args.length; i++) values[i] = args[i].value(s, c);
+            for (int i = 0; i < args.length; i++) values[i] = settled(args[i].value(s, c));
             List<MolangValue> list = Arrays.asList(values);
             try {
                 MolangValue result = function instanceof MolangEnvironment.ValueFunction fn
@@ -1183,7 +1195,7 @@ public final class MolangProgram<T> {
                 return result == null ? MolangValue.NULL : result;
             } catch (RuntimeException ex) {
                 reportFailure(s, name, ex, position);
-                return MolangValue.NULL;
+                return FAILED;
             }
         }
     }
@@ -1270,9 +1282,11 @@ public final class MolangProgram<T> {
 
     // Shared behaviour
 
-    /// A value as a number, reporting a content error at `position` (and giving 0) if it is not one.
+    /// A value as a number, reporting a content error at `position` (and giving 0) if it is not one
+    /// and has not already been reported.
     static double unwrap(MolangState s, MolangValue value, int position) {
         if (value instanceof MolangValue.Num(double number)) return number;
+        if (value == FAILED) return 0.0;
         s.error("Expected number, got: " + value, position);
         return 0.0;
     }

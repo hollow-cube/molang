@@ -40,10 +40,31 @@ public class TestContentErrorPositions {
 
     @Test
     public void testOtherErrors() {
-        assertEquals("1:3", locations("1;break").getFirst());
+        assertEquals(List.of("1:3"), locations("1;break"));
         assertEquals(List.of("1:5"), locations("1 + q.half"));
-        assertEquals("1:1", locations("loop(1)").getFirst());
+        assertEquals(List.of("1:1"), locations("loop(1)"));
         assertEquals(List.of("1:1"), locations(""));
+    }
+
+    @Test
+    public void testErrorsAreReportedOnce() {
+        for (String source : List.of(
+            "nope()",
+            "break",
+            "continue",
+            "v.x.y",
+            "q.half.x",
+            "loop",
+            "1 + nope()",
+            "q.half(nope())",
+            "nope() == 'a'",
+            "return nope()",
+            "v.a = nope(); v.a ?? 1",
+            "1 ? math.nope() : 2"
+        ))
+            assertEquals(1, errors(source).size(), () -> source + ": " + errors(source));
+        // A failed value stored in a variable is plain null, so reading it as a number is an error
+        assertEquals(List.of("1:7", "1:15"), locations("v.a = nope(); v.a + 1"));
     }
 
     @Test
