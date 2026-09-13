@@ -35,6 +35,10 @@ final class MolangPrinter {
                 "(? %s %s)", print(lhs),
                 args.stream().map(MolangPrinter::print).collect(Collectors.joining(" "))
             );
+            case MolangExpr.Assign(
+                var target,
+                var value
+            ) -> String.format("(= %s %s)", print(target), print(value));
             case MolangExpr.Block(
                 var exprs
             ) -> exprs.isEmpty()

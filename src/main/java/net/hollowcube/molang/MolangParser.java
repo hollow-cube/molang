@@ -76,6 +76,11 @@ public final class MolangParser {
             // Parse right side expression
             MolangExpr rhs = expr(op.rbp);
             lhs = switch (op) {
+                case ASSIGN -> {
+                    if (!(lhs instanceof MolangExpr.Access target))
+                        throw new IllegalStateException("cannot assign to " + lhs);
+                    yield new MolangExpr.Assign(target, rhs);
+                }
                 case MEMBER_ACCESS -> {
                     if (!(rhs instanceof MolangExpr.Ident(String value)))
                         throw new IllegalStateException(
@@ -148,6 +153,7 @@ public final class MolangParser {
             case BANGEQ -> Operator.NEQ;
             case AMPAMP -> Operator.AND;
             case BARBAR -> Operator.OR;
+            case EQ -> Operator.ASSIGN;
             default -> null;
         };
     }
@@ -177,6 +183,8 @@ public final class MolangParser {
         TERNARY(0, 0, null), // Open of a ternary expression (?), only a postfix operator
 
         NULL_COALESCE(5, 6, MolangExpr.Binary.Op.NULL_COALESCE),
+
+        ASSIGN(2, 0, null), // Right side is the rest of the expression, eg `v.x = a ? b : c`
 
         LPAREN(30, 30, null),
         ;

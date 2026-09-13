@@ -72,6 +72,7 @@ public final class MolangEvaluator {
                 case MolangExpr.Ternary ternary -> evalTernary(ternary);
                 case MolangExpr.Block block -> evalBlock(block);
                 case MolangExpr.Call call -> evalCall(call);
+                case MolangExpr.Assign assign -> evalAssign(assign);
             };
         } catch (Break | Continue value) {
             if (!loopScope) {
@@ -119,6 +120,19 @@ public final class MolangEvaluator {
         // If the value is a function, we should call it with zero args.
         if (value instanceof MolangValue.Function func) return evalCallInternal(func, List.of());
         return value;
+    }
+
+    private MolangValue evalAssign(MolangExpr.Assign assign) {
+        final MolangExpr.Access target = assign.target();
+        final MolangValue holder = evalExpr(target.lhs());
+        if (!(holder instanceof MolangValue.Holder.Mutable mutable)) {
+            errors.add(
+                new ContentError("Cannot assign field '" + target.field() + "' on: " + holder)
+            );
+            return new MolangValue.Num(0.0);
+        }
+        mutable.set(target.field(), evalExpr(assign.value()));
+        return new MolangValue.Num(0.0);
     }
 
     private MolangValue evalUnary(MolangExpr.Unary unary) {

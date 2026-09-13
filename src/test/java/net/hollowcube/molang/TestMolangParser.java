@@ -37,6 +37,18 @@ public class TestMolangParser {
                 "1 + 2 ?? 1",
                 "(?? (+ 1.0 2.0) 1.0)"
             ), //todo is this correct? should it be (+ 1.0 (?? 2.0 1.0))?
+            Arguments.of("assignment", "v.x = 1", "(= (. v x) 1.0)"),
+            Arguments.of(
+                "assignment takes the whole rhs",
+                "v.x = 1 ? 2 : 3",
+                "(= (. v x) (? 1.0 2.0 3.0))"
+            ),
+            Arguments.of("assignment vs equality", "v.x == 1", "(== (. v x) 1.0)"),
+            Arguments.of(
+                "assignment in ternary branch",
+                "0 ? v.x = 1 : 2",
+                "(? 0.0 (= (. v x) 1.0) 2.0)"
+            ),
             Arguments.of("normalize case 1", "q.is_alive()", "(. q is_alive)"),
             Arguments.of("empty call operand", "q.is_alive() + 1", "(+ (. q is_alive) 1.0)"),
             Arguments.of("trailing whitespace", "1 + 2 \n", "(+ 1.0 2.0)"),
@@ -57,6 +69,18 @@ public class TestMolangParser {
     }
 
     private static Stream<String> invalidInputs() {
-        return Stream.of("1 2", "a.b c", "(1))", "1 ? 2 : 3 4", "{1;} 2", "q.is_alive() 1", "f(");
+        return Stream.of(
+            "1 2",
+            "a.b c",
+            "(1))",
+            "1 ? 2 : 3 4",
+            "{1;} 2",
+            "q.is_alive() 1",
+            "f(",
+            "a = 1",
+            "1 + v.x = 2",
+            "v.x =",
+            "v.x = = 1"
+        );
     }
 }

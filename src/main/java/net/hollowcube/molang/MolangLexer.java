@@ -21,6 +21,7 @@ final class MolangLexer {
         GT,
         LTEQ,
         LT,
+        EQ,
         EQEQ,
         BANGEQ,
         SEMICOLON,
@@ -127,7 +128,7 @@ final class MolangLexer {
             case ';' -> Tok.SEMICOLON;
             case '>' -> match('=') ? Tok.GTEQ : Tok.GT;
             case '<' -> match('=') ? Tok.LTEQ : Tok.LT;
-            case '=' -> match('=') ? Tok.EQEQ : unexpected(c);
+            case '=' -> match('=') ? Tok.EQEQ : Tok.EQ;
             case '!' -> match('=') ? Tok.BANGEQ : Tok.BANG;
             case '&' -> match('&') ? Tok.AMPAMP : unexpected(c);
             case '|' -> match('|') ? Tok.BARBAR : unexpected(c);

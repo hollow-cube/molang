@@ -106,6 +106,15 @@ public sealed interface MolangExpr {
         }
     }
 
+    /// Assignment to a field of a writable holder (eg `v.x = 1`), which evaluates to 0.
+    record Assign(Access target, MolangExpr value) implements MolangExpr {
+
+        @Override
+        public String toString() {
+            return target + " = " + value;
+        }
+    }
+
     record Call(MolangExpr lhs, List<MolangExpr> args) implements MolangExpr {
 
         @Override

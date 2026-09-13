@@ -1,10 +1,12 @@
 package net.hollowcube.molang.eval;
 
 import net.hollowcube.molang.MolangParser;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -19,6 +21,41 @@ public class TestMolangEvaluator {
         var actual = new MolangEvaluator(Map.of()).eval(expr);
 
         assertEquals(expected, String.valueOf(actual));
+    }
+
+    @Test
+    public void testAssignment() {
+        var evaluator = new MolangEvaluator(Map.of());
+
+        assertEquals(0, eval(evaluator, "v.x = 5"));
+        assertEquals(0, eval(evaluator, "variable.y = v.x * 2"));
+        assertEquals(0, eval(evaluator, "0 ? v.x = 1 : v.z = 3"));
+        assertEquals(5, eval(evaluator, "variable.x"));
+        assertEquals(10, eval(evaluator, "v.y"));
+        assertEquals(3, eval(evaluator, "v.z"));
+        assertEquals(new MolangValue.Num(5), evaluator.getVariable("x"));
+    }
+
+    @Test
+    public void testTempAssignmentIsScopedToOneEvaluation() {
+        var evaluator = new MolangEvaluator(Map.of());
+
+        assertEquals(0, eval(evaluator, "t.x = 5"));
+        assertEquals(0, eval(evaluator, "temp.y = 5"));
+        assertEquals(7, eval(evaluator, "(t.x ?? 7) + (temp.y ?? 0)"));
+    }
+
+    @Test
+    public void testAssignmentToReadOnlyHolder() {
+        var evaluator = new MolangEvaluator(Map.of());
+        assertEquals(0, evaluator.eval(new MolangParser("math.pi = 3").parse()));
+        assertEquals(1, evaluator.getErrors().size(), () -> evaluator.getErrors().toString());
+    }
+
+    private static double eval(MolangEvaluator evaluator, String input) {
+        var actual = evaluator.eval(new MolangParser(input).parse());
+        assertEquals(List.of(), evaluator.getErrors());
+        return actual;
     }
 
     @MethodSource("contentErrors")
