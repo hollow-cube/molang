@@ -1,12 +1,10 @@
 package net.hollowcube.molang;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.stream.Collectors;
 
 final class MolangPrinter {
 
-    public static @NotNull String print(@NotNull MolangExpr expr) {
+    public static String print(MolangExpr expr) {
         return switch (expr) {
             case MolangExpr.Num(var value) -> String.valueOf(value);
             case MolangExpr.Str(var value) -> "'" + value + "'";
@@ -24,14 +22,14 @@ final class MolangPrinter {
         };
     }
 
-    private static @NotNull String unaryOp(@NotNull MolangExpr.Unary.Op op) {
+    private static String unaryOp(MolangExpr.Unary.Op op) {
         return switch (op) {
             case NEGATE -> "-";
             case NOT -> "!";
         };
     }
 
-    private static @NotNull String binaryOp(@NotNull MolangExpr.Binary.Op op) {
+    private static String binaryOp(MolangExpr.Binary.Op op) {
         return op.symbol();
     }
 }
