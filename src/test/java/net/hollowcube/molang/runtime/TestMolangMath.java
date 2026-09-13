@@ -24,6 +24,32 @@ public class TestMolangMath {
         assertEquals(expected, actual, 1e-9);
     }
 
+    @MethodSource("domainErrors")
+    @ParameterizedTest(name = "{0}")
+    public void testDomainErrorEvaluatesToZero(String input) {
+        var evaluator = new MolangEvaluator(Map.of());
+        var actual = evaluator.eval(new MolangParser(input).parse());
+
+        assertEquals(1, evaluator.getErrors().size(), () -> evaluator.getErrors().toString());
+        assertEquals(0.0, actual);
+    }
+
+    private static Stream<String> domainErrors() {
+        return Stream.of(
+                "math.sqrt(-1)",
+                "math.ln(0)",
+                "math.ln(-1)",
+                "math.mod(5, 0)",
+                "math.asin(1.5)",
+                "math.asin(-1.5)",
+                "math.acos(1.5)",
+                "math.acos(-1.5)",
+                "math.pow(-8, 0.5)",
+                "math.pow(0, -1)",
+                "math.inverse_lerp(2, 2, 3)"
+        );
+    }
+
     // Expected values are the results of evaluating the same expression with Blockbench's molangjs (1.7.0).
     public static Stream<Arguments> cases() {
         return Stream.of(
@@ -47,6 +73,13 @@ public class TestMolangMath {
             Arguments.of("math.sign(0)", 0),
                 Arguments.of("math.sign(2.5)", 1),
                 Arguments.of("math.sign(-0.5)", -1),
+
+                Arguments.of("math.sqrt(0)", 0),
+                Arguments.of("math.ln(1)", 0),
+                Arguments.of("math.pow(-2, 3)", -8),
+                Arguments.of("math.pow(0, 0)", 1),
+                Arguments.of("math.asin(1)", 90),
+                Arguments.of("math.acos(-1)", 180),
 
                 Arguments.of("math.ease_in_out_back(2, 10, 0)", 2),
                 Arguments.of("math.ease_in_out_back(2, 10, 0.1)", 1.699851584),

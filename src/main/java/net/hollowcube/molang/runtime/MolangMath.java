@@ -284,6 +284,7 @@ public final class MolangMath {
 
     /// Returns the normalized progress between start and end given value
     public static double inverseLerp(double start, double end, double value) {
+        assertion(start != end, "inverse_lerp: start and end cannot be equal");
         return (value - start) / (end - start);
     }
 
@@ -314,6 +315,7 @@ public final class MolangMath {
 
     /// Natural logarithm of value
     public static double ln(double value) {
+        assertion(value > 0, "ln: value must be positive");
         return Math.log(value);
     }
 
@@ -352,7 +354,10 @@ public final class MolangMath {
 
     /// Elevates base to the exponent'th power
     public static double pow(double base, double exponent) {
-        return Math.pow(base, exponent);
+        assertion(base != 0 || exponent >= 0, "pow: cannot raise 0 to a negative exponent");
+        double result = Math.pow(base, exponent);
+        assertion(!Double.isNaN(result), "pow: negative base requires an integer exponent");
+        return result;
     }
 
     /// Random value between low (inclusive) and high (exclusive)
@@ -386,6 +391,7 @@ public final class MolangMath {
 
     /// Square root of value
     public static double sqrt(double value) {
+        assertion(value >= 0, "sqrt: value cannot be negative");
         return Math.sqrt(value);
     }
 
