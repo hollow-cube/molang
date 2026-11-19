@@ -191,6 +191,7 @@ final class MolangParser {
             case PLUS -> Operator.PLUS;
             case MINUS -> Operator.MINUS;
             case SLASH -> Operator.DIV;
+            case SLASLA -> Operator.IDIV;
             case STAR -> Operator.MUL;
             case DOT -> Operator.MEMBER_ACCESS;
             case QUESTION -> Operator.TERNARY;
@@ -219,6 +220,7 @@ final class MolangParser {
 
         MUL(27, 28, MolangExpr.Binary.Op.MUL),
         DIV(27, 28, MolangExpr.Binary.Op.DIV),
+        IDIV(27, 28, MolangExpr.Binary.Op.IDIV),
 
         PLUS(25, 26, MolangExpr.Binary.Op.PLUS),
         MINUS(25, 26, MolangExpr.Binary.Op.MINUS),
