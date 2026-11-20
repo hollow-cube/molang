@@ -507,6 +507,40 @@ public final class MolangProgram<T> {
         }
     }
 
+    private static final class IntDiv extends NumNode {
+        final Node lhs, rhs;
+
+        IntDiv(Node lhs, Node rhs) {
+            this.lhs = lhs;
+            this.rhs = rhs;
+        }
+
+        @Override
+        double num(MolangState s, Object c) {
+            double l = lhs.num(s, c), r = rhs.num(s, c);
+            if (r == 0.0) {
+                s.error("Division by zero", position);
+                return 0.0;
+            }
+            return Math.floor(l / r);
+        }
+    }
+
+    private static final class IntDivConst extends NumNode {
+        final Node lhs;
+        final double rhs; // never zero
+
+        IntDivConst(Node lhs, double rhs) {
+            this.lhs = lhs;
+            this.rhs = rhs;
+        }
+
+        @Override
+        double num(MolangState s, Object c) {
+            return Math.floor(lhs.num(s, c) / rhs);
+        }
+    }
+
     private static final class Compare extends NumNode {
         final MolangExpr.Binary.Op op;
         final Node lhs, rhs;
@@ -1703,6 +1737,9 @@ public final class MolangProgram<T> {
                 case DIV -> optimize && r instanceof NumConst k && k.value != 0.0
                     ? new DivConst(l, k.value)
                     : new Div(l, r);
+                case IDIV -> optimize && r instanceof NumConst k && k.value != 0.0
+                    ? new IntDivConst(l, k.value)
+                    : new IntDiv(l, r);
                 case EQ, NEQ -> l.numeric() && r.numeric()
                     ? new Compare(op, l, r)
                     : new Equals(op == MolangExpr.Binary.Op.EQ, l, r);

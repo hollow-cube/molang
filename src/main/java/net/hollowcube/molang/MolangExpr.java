@@ -80,6 +80,7 @@ sealed interface MolangExpr {
             PLUS("+"),
             MINUS("-"),
             DIV("/"),
+            IDIV("//"),
             MUL("*"),
             NULL_COALESCE("??"),
             GTE(">="),

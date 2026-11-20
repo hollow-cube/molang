@@ -8,6 +8,7 @@ final class MolangLexer {
         MINUS,
         STAR,
         SLASH,
+        SLASLA,
         LPAREN,
         RPAREN,
         LBRACE,
@@ -158,7 +159,7 @@ final class MolangLexer {
             case '+' -> Tok.PLUS;
             case '-' -> Tok.MINUS;
             case '*' -> Tok.STAR;
-            case '/' -> Tok.SLASH;
+            case '/' -> match('/') ? Tok.SLASLA : Tok.SLASH;
             case '.' -> Tok.DOT;
             case ',' -> Tok.COMMA;
             case '?' -> match('?') ? Tok.QUESTIONQUESTION : Tok.QUESTION;

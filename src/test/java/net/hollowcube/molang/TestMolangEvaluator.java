@@ -101,6 +101,7 @@ public class TestMolangEvaluator {
             Arguments.of("0 ? 2 : 0 ? 4 : 5", 5),
             Arguments.of("0 ?? 2 ? 3 : 4", 0),
             Arguments.of("1 ? 2 : 3 ?? 9", 2),
+            Arguments.of("67 // 21", 3),
             Arguments.of("v.z = 1 ? 2; v.z", 2),
             Arguments.of("Math.Lerp(0, 10, 0.5)", 5),
             Arguments.of("Q.Anim_Time * 10", 3),
